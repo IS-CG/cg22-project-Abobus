@@ -1,24 +1,18 @@
-from tkinter import *
-from PIL import ImageTk, Image
-from tkinter import filedialog
-import numpy as np
 import re
 
-mains = Tk()
+import tkinter as tk
+from PIL import Image
+from tkinter import filedialog
+import numpy as np
+from loguru import logger
+
+from lib.utils import enforce
+
+mains = tk.Tk()
 mains.geometry("1200x900")
 mains.bg = "BLUE"
 mains.title("Image editor")
 img = None
-
-
-def __enforce(expression, error_msg_if_false, exception_type=RuntimeError):
-    if not expression:
-        raise exception_type(error_msg_if_false)
-
-
-def __disallow(expression, error_msg_if_true, exception_type=RuntimeError):
-    if expression:
-        raise exception_type(error_msg_if_true)
 
 
 def read_img(verbose=False):
@@ -29,10 +23,10 @@ def read_img(verbose=False):
         """
     filespec = filedialog.askopenfilename(title="open")
     valid_extensions = [".pnm", ".ppm", ".pgm", ".PNM", ".PPM", ".PGM"]
-    __enforce(isinstance(filespec, str) and len(filespec) >= 5,
-              "filespec must be a string of length >= 5, was %r." % (filespec))
-    __enforce(filespec[-4:] in valid_extensions,
-              "file extension must be .pnm, .ppm, or .pgm; was %s." % (filespec[-4:]))
+    enforce(isinstance(filespec, str) and len(filespec) >= 5,
+            "filespec must be a string of length >= 5, was %r." % (filespec))
+    enforce(filespec[-4:] in valid_extensions,
+            "file extension must be .pnm, .ppm, or .pgm; was %s." % (filespec[-4:]))
     with open(filespec, "rb") as f:
         buf = f.read()
         regex_pnm_header = b"(^(P[56])\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s)"
@@ -43,7 +37,7 @@ def read_img(verbose=False):
             numch = 3 if typestr == b"P6" else 1
             shape = (height, width, numch) if typestr == b"P6" else (height, width)
             if verbose:
-                print("Reading file %s " % (filespec), end='')
+                logger.info("Reading file %s " % (filespec), end='')
                 print("(w=%d, h=%d, c=%d, maxval=%d)" % (width, height, numch, maxval))
             dtype = ">u2" if maxval > 255 else np.uint8
             pixels = np.frombuffer(buf, dtype, count=width * height * numch, offset=len(header))
@@ -51,13 +45,39 @@ def read_img(verbose=False):
     display_img_array(pixels)
 
 
-def display_img_array(data):
+def display_img_array(data: np.ndarray) -> None:
     global img
-    img = Image.fromarray(data, 'RGB')
-    dispimage = ImageTk.PhotoImage(img)
+    height, width, rgb = data.shape
+    img_data = f'P5 {width} {height} 255'.encode() + imageConvert_tk18(data).astype(np.uint8).tobytes()
+
+    dispimage = tk.PhotoImage(width=width, height=height, data=img_data, format='PPM')
     img = dispimage
     panel.configure(image=dispimage)
     panel.image = dispimage
+    img = Image.fromarray(data, 'RGB')
+    dispimage = ImageTk.PhotoImage(img)
+
+
+def imageConvert_tk18(image):
+    x,y = image.shape[0:2]
+    arr =np.ndarray((x,y,3))
+    arr[...,:] = (np.uint8(image[...,:] >> 2) * 4)
+    return arr
+
+
+def imageConvert_tk16(image):
+    x,y = image.shape[0:2]
+    arr = np.ndarray((x,y,3))
+    arr[...,0:3:2] = (np.uint8(image[...,0:3:2] >> 3) * 8)
+    arr[...,1] = (np.uint8(image[...,1] >> 2) * 4)
+    return arr
+
+
+def imageConvert_tk12(image):
+    x,y = image.shape[0:2]
+    arr =np.ndarray((x,y,3))
+    arr[...,:] = (np.uint8(image[...,:] >> 4) * 16)
+    return arr
 
 
 def rotate(): # TODO: поменять на numpy
@@ -79,19 +99,21 @@ def save():
         img.save(imgname)
 
 
-panel = Label(mains, bg="BLACK")
-panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
+if __name__ == "__main__":
 
-btnOpen = Button(mains, text='Open', width=25, command=read_img, bg="RED")
-btnOpen.grid(row=0, column=1)
+    panel = tk.Label(mains, bg="BLACK")
+    panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
 
-btnRotate = Button(mains, text='Rotate', width=25, command=rotate, bg="BLUE")
-btnRotate.grid(row=1, column=1)
+    btnOpen = tk.Button(mains, text='Open', width=25, command=read_img, bg="RED")
+    btnOpen.grid(row=0, column=1)
 
-btnFlip = Button(mains, text='Flip', width=25, command=flip, bg="PINK")
-btnFlip.grid(row=2, column=1)
+    btnRotate = tk.Button(mains, text='Rotate', width=25, command=rotate, bg="BLUE")
+    btnRotate.grid(row=1, column=1)
 
-btnSave = Button(mains, text='Save', width=25, command=save, bg="YELLOW")
-btnSave.grid(row=3, column=1)
+    btnFlip = tk.Button(mains, text='Flip', width=25, command=flip, bg="PINK")
+    btnFlip.grid(row=2, column=1)
 
-mains.mainloop()
+    btnSave = tk.Button(mains, text='Save', width=25, command=save, bg="YELLOW")
+    btnSave.grid(row=3, column=1)
+
+    mains.mainloop()

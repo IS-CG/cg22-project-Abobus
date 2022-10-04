@@ -1,1 +1,1 @@
-aboba
+##### [Условия лаб](https://docs.google.com/document/d/18vZHobQ0sUQ5i9SJ37konNfA_vhtcnIh6Tj79oa35-s/edit)

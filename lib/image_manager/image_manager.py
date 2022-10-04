@@ -1,0 +1,2 @@
+class ImageManager:
+    pass

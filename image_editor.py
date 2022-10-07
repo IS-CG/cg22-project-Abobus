@@ -47,22 +47,26 @@ def read_img(verbose=False):
 
 def display_img_array(data: np.ndarray) -> None:
     global img
-    dispimage = ImageTk.PhotoImage(Image.fromarray(data, 'RGB'))
-    img = dispimage
+    img = Image.fromarray(data)
+    display_img()
+
+
+def display_img():
+    dispimage = ImageTk.PhotoImage(img)
     panel.configure(image=dispimage)
     panel.image = dispimage
 
 
-def rotate(): # TODO: поменять на numpy
+def rotate():  # TODO: поменять на numpy
     global img
     img = img.rotate(90)
-    display_img_array(img)
+    display_img()
 
 
-def flip(): # TODO: поменять на numpy
+def flip():  # TODO: поменять на numpy
     global img
     img = img.transpose(Image.FLIP_LEFT_RIGHT)
-    display_img_array(img)
+    display_img()
 
 
 def save():
@@ -73,7 +77,6 @@ def save():
 
 
 if __name__ == "__main__":
-
     panel = tk.Label(mains, bg="BLACK")
     panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
 

@@ -1,2 +1,0 @@
-class ImageManager:
-    pass

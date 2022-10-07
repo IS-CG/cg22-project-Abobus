@@ -8,7 +8,7 @@ from PIL import Image
 
 
 def _photo_image(image: np.ndarray):
-    height, width = image.shape[: 2]
+    height, width = image.shape[:2]
     ppm_header = f'P6 {width} {height} 255 '.encode()
     data = ppm_header + cv2.cvtColor(image, cv2.COLOR_BGR2RGB).tobytes()
     return tk.PhotoImage(width=width, height=height, data=data, format='PPM')

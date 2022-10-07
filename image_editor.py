@@ -1,7 +1,7 @@
 import re
 
 import tkinter as tk
-from PIL import Image
+from PIL import Image, ImageTk
 from tkinter import filedialog
 import numpy as np
 from loguru import logger
@@ -47,37 +47,10 @@ def read_img(verbose=False):
 
 def display_img_array(data: np.ndarray) -> None:
     global img
-    height, width, rgb = data.shape
-    img_data = f'P5 {width} {height} 255'.encode() + imageConvert_tk18(data).astype(np.uint8).tobytes()
-
-    dispimage = tk.PhotoImage(width=width, height=height, data=img_data, format='PPM')
+    dispimage = ImageTk.PhotoImage(Image.fromarray(data, 'RGB'))
     img = dispimage
     panel.configure(image=dispimage)
     panel.image = dispimage
-    img = Image.fromarray(data, 'RGB')
-    dispimage = ImageTk.PhotoImage(img)
-
-
-def imageConvert_tk18(image):
-    x,y = image.shape[0:2]
-    arr =np.ndarray((x,y,3))
-    arr[...,:] = (np.uint8(image[...,:] >> 2) * 4)
-    return arr
-
-
-def imageConvert_tk16(image):
-    x,y = image.shape[0:2]
-    arr = np.ndarray((x,y,3))
-    arr[...,0:3:2] = (np.uint8(image[...,0:3:2] >> 3) * 8)
-    arr[...,1] = (np.uint8(image[...,1] >> 2) * 4)
-    return arr
-
-
-def imageConvert_tk12(image):
-    x,y = image.shape[0:2]
-    arr =np.ndarray((x,y,3))
-    arr[...,:] = (np.uint8(image[...,:] >> 4) * 16)
-    return arr
 
 
 def rotate(): # TODO: поменять на numpy

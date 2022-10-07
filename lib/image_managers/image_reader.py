@@ -7,10 +7,12 @@ from tkinter import filedialog
 from PIL import Image
 
 from lib.utils import enforce
+from ui.ui_decorators import add_new_img
 
 
 class ImageReader:
     @staticmethod
+    @add_new_img
     def read_img(verbose: bool = False) -> np.ndarray:
         """
         Reads in a PGM/PPM file by the given name and returns its contents in a new numpy

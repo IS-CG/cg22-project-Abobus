@@ -2,7 +2,7 @@ import yaml
 
 from ui import ImageViewer
 
-with open('configs/ui_config.yaml', 'r') as f:
+with open('ui/ui_config.yaml', 'r') as f:
     ui_conf = yaml.safe_load(f)
 
 if __name__ == "__main__":

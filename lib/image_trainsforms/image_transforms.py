@@ -1,10 +1,15 @@
 from PIL import Image
+import numpy as np
 
 
-def rotate(img: Image) -> Image:  # todo from scratch
-    return img.rotate(90)
+from ui import change_old_img
 
 
-def flip(img: Image) -> Image:  # todo from scratch
-    return img.transpose(Image.FLIP_LEFT_RIGHT)
+@change_old_img
+def rotate(data: np.ndarray) -> np.ndarray:  # todo from scratch
+    return np.asarray(Image.fromarray(data).rotate(90))
 
+
+@change_old_img
+def flip(data: np.ndarray) -> np.ndarray:  # todo from scratch
+    return np.asarray(Image.fromarray(data).transpose(Image.FLIP_LEFT_RIGHT))

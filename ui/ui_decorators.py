@@ -6,8 +6,9 @@ import numpy as np
 from .ui_singleton import UISingleton
 
 
-def show_image(data: np.ndarray):
-    data.img_array = data
+def show_image(img_data: np.ndarray):
+    data = UISingleton.ui_data()
+    data.img_array = img_data
     disp_image = ImageTk.PhotoImage(Image.fromarray(data.img_array, 'RGB'))
     data.img = disp_image
     data.panel.configure(image=disp_image)

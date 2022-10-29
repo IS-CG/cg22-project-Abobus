@@ -1,8 +1,9 @@
 import re
+import cv2
 
 import tkinter as tk
 from PIL import Image, ImageTk
-from tkinter import filedialog
+from tkinter import filedialog, Menu
 import numpy as np
 from loguru import logger
 
@@ -13,6 +14,7 @@ mains.geometry("1200x900")
 mains.bg = "BLUE"
 mains.title("Image editor")
 img = None
+COLOR = "RGB"  # by default
 
 
 def read_img(verbose=False):
@@ -76,20 +78,53 @@ def save():
         img.save(imgname)
 
 
+def change_to_hsl():
+    pass
+
+
+def change_to_hsv():
+    global img
+    if COLOR == "RGB":
+        cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+
+
 if __name__ == "__main__":
     panel = tk.Label(mains, bg="BLACK")
     panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
 
-    btnOpen = tk.Button(mains, text='Open', width=25, command=read_img, bg="RED")
-    btnOpen.grid(row=0, column=1)
+    # btnOpen = tk.Button(mains, text='Open', width=25, command=read_img, bg="RED")
+    # btnOpen.grid(row=0, column=1)
+    #
+    # btnRotate = tk.Button(mains, text='Rotate', width=25, command=rotate, bg="BLUE")
+    # btnRotate.grid(row=1, column=1)
+    #
+    # btnFlip = tk.Button(mains, text='Flip', width=25, command=flip, bg="PINK")
+    # btnFlip.grid(row=2, column=1)
+    #
+    # btnSave = tk.Button(mains, text='Save', width=25, command=save, bg="YELLOW")
+    # btnSave.grid(row=3, column=1)
 
-    btnRotate = tk.Button(mains, text='Rotate', width=25, command=rotate, bg="BLUE")
-    btnRotate.grid(row=1, column=1)
+    main_menu = Menu(mains)
+    mains.config(menu=main_menu)
 
-    btnFlip = tk.Button(mains, text='Flip', width=25, command=flip, bg="PINK")
-    btnFlip.grid(row=2, column=1)
+    file_menu = Menu(main_menu, tearoff=0)
+    file_menu.add_command(label="Open", command=read_img)
+    file_menu.add_command(label="Rotate", command=rotate)
+    file_menu.add_command(label="Flip", command=flip)
+    file_menu.add_command(label="Save", command=save)
 
-    btnSave = tk.Button(mains, text='Save', width=25, command=save, bg="YELLOW")
-    btnSave.grid(row=3, column=1)
+    color_menu = Menu(main_menu, tearoff=0)
+    color_menu.add_command(label="RGB")
+    color_menu.add_command(label="HSL")
+    color_menu.add_command(label="HSV")
+    color_menu.add_command(label="YCbCr.601")
+    color_menu.add_command(label="YCbCr.709")
+    color_menu.add_command(label="YCoCg")
+    color_menu.add_command(label="CMY")
+
+    main_menu.add_cascade(label="File",
+                          menu=file_menu)
+    main_menu.add_cascade(label="Colors",
+                          menu=color_menu)
 
     mains.mainloop()

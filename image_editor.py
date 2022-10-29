@@ -14,10 +14,12 @@ mains.geometry("1200x900")
 mains.bg = "BLUE"
 mains.title("Image editor")
 img = None
+img_array = None
 COLOR = "RGB"  # by default
 
 
 def read_img(verbose=False):
+    global img_array
     """
         Reads in a PGM/PPM file by the given name and returns its contents in a new numpy
         ndarray with 8/16-bit elements. Also returns the maximum representable value of a
@@ -44,6 +46,7 @@ def read_img(verbose=False):
             dtype = ">u2" if maxval > 255 else np.uint8
             pixels = np.frombuffer(buf, dtype, count=width * height * numch, offset=len(header))
             pixels = pixels.reshape(shape).astype(np.uint8 if maxval <= 255 else np.uint16)
+    img_array = pixels
     display_img_array(pixels)
 
 
@@ -83,9 +86,10 @@ def change_to_hsl():
 
 
 def change_to_hsv():
-    global img
+    global img_array
     if COLOR == "RGB":
-        cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2HSV)
+    display_img_array(img_array)
 
 
 if __name__ == "__main__":
@@ -116,7 +120,7 @@ if __name__ == "__main__":
     color_menu = Menu(main_menu, tearoff=0)
     color_menu.add_command(label="RGB")
     color_menu.add_command(label="HSL")
-    color_menu.add_command(label="HSV")
+    color_menu.add_command(label="HSV", command=change_to_hsv)
     color_menu.add_command(label="YCbCr.601")
     color_menu.add_command(label="YCbCr.709")
     color_menu.add_command(label="YCoCg")

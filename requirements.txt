@@ -1,6 +1,7 @@
 numpy==1.23.3
 pillow==9.2.0
 loguru==0.6.0
-opencv-python==4.6.0.66
+opencv-python==4.5.5.62
+opencv-contrib-python==4.5.5.62
 pyaml==21.10.1
 dependency-injector==4.40.0

@@ -94,6 +94,8 @@ def change_to_rgb():
         img_array = cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB)
         COLOR = "RGB"
 
+    display_img_array(img_array)
+
 
 def change_to_hls():
     global img_array
@@ -155,7 +157,7 @@ if __name__ == "__main__":
     file_menu.add_command(label="Save", command=save)
 
     color_menu = Menu(main_menu, tearoff=0)
-    color_menu.add_command(label="RGB")
+    color_menu.add_command(label="RGB", command=change_to_rgb)
     color_menu.add_command(label="HLS", command=change_to_hls)
     color_menu.add_command(label="HSV", command=change_to_hsv)
     color_menu.add_command(label="YCrCb", command=change_to_ycrcb)

@@ -81,32 +81,69 @@ def save():
         img.save(imgname)
 
 
-def change_to_hsl():
-    pass
+def change_to_rgb():
+    global img_array
+    global COLOR
+    if COLOR == "HSV":
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB)
+        COLOR = "RGB"
+    if COLOR == "HLS":
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB)
+        COLOR = "RGB"
+    if COLOR == "YCrCb":
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB)
+        COLOR = "RGB"
+
+
+def change_to_hls():
+    global img_array
+    global COLOR
+    if COLOR == "RGB":
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2HLS)
+        COLOR = "HLS"
+    if COLOR == "HSV":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2HLS)
+        COLOR = "HLS"
+    if COLOR == "YCrCb":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HLS)
+        COLOR = "HLS"
+
+    display_img_array(img_array)
 
 
 def change_to_hsv():
+    global COLOR
     global img_array
     if COLOR == "RGB":
         img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2HSV)
+        COLOR = "HSV"
+    if COLOR == "HLS":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2HSV)
+        COLOR = "HSV"
+    if COLOR == "YCrCb":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HSV)
+        COLOR = "HSV"
+    display_img_array(img_array)
+
+
+def change_to_ycrcb():
+    global COLOR
+    global img_array
+    if COLOR == "RGB":
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2YCrCb)
+        COLOR = "YCrCb"
+    if COLOR == "HSV":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
+        COLOR = "YCrCb"
+    if COLOR == "HLS":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
+        COLOR = "YCrCb"
     display_img_array(img_array)
 
 
 if __name__ == "__main__":
     panel = tk.Label(mains, bg="BLACK")
     panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
-
-    # btnOpen = tk.Button(mains, text='Open', width=25, command=read_img, bg="RED")
-    # btnOpen.grid(row=0, column=1)
-    #
-    # btnRotate = tk.Button(mains, text='Rotate', width=25, command=rotate, bg="BLUE")
-    # btnRotate.grid(row=1, column=1)
-    #
-    # btnFlip = tk.Button(mains, text='Flip', width=25, command=flip, bg="PINK")
-    # btnFlip.grid(row=2, column=1)
-    #
-    # btnSave = tk.Button(mains, text='Save', width=25, command=save, bg="YELLOW")
-    # btnSave.grid(row=3, column=1)
 
     main_menu = Menu(mains)
     mains.config(menu=main_menu)
@@ -119,12 +156,11 @@ if __name__ == "__main__":
 
     color_menu = Menu(main_menu, tearoff=0)
     color_menu.add_command(label="RGB")
-    color_menu.add_command(label="HSL")
+    color_menu.add_command(label="HLS", command=change_to_hls)
     color_menu.add_command(label="HSV", command=change_to_hsv)
-    color_menu.add_command(label="YCbCr.601")
-    color_menu.add_command(label="YCbCr.709")
-    color_menu.add_command(label="YCoCg")
-    color_menu.add_command(label="CMY")
+    color_menu.add_command(label="YCrCb", command=change_to_ycrcb)
+    # color_menu.add_command(label="YCoCg") # TODO: пока хз че это
+    # color_menu.add_command(label="CMY")
 
     main_menu.add_cascade(label="File",
                           menu=file_menu)

@@ -81,7 +81,7 @@ def save():
         img.save(imgname)
 
 
-def change_to_rgb():
+def change_to_rgb(display=True):
     global img_array
     global COLOR
     if COLOR == "HSV":
@@ -94,7 +94,15 @@ def change_to_rgb():
         img_array = cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB)
         COLOR = "RGB"
 
-    display_img_array(img_array)
+    if COLOR == "CMY":
+        c = 255 - img_array[..., 0].astype(float)
+        m = 255 - img_array[..., 1].astype(float)
+        y = 255 - img_array[..., 2].astype(float)
+        img_array = (np.dstack((c, m, y))).astype(np.uint8)
+        COLOR = "RGB"
+
+    if display:
+        display_img_array(img_array)
 
 
 def change_to_hls():
@@ -109,7 +117,10 @@ def change_to_hls():
     if COLOR == "YCrCb":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HLS)
         COLOR = "HLS"
-
+    if COLOR == "CMY":
+        change_to_rgb(display=False)
+        change_to_hls()
+        COLOR = "HLS"
     display_img_array(img_array)
 
 
@@ -125,6 +136,10 @@ def change_to_hsv():
     if COLOR == "YCrCb":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HSV)
         COLOR = "HSV"
+    if COLOR == "CMY":
+        change_to_rgb(display=False)
+        change_to_hsv()
+        COLOR = "HSV"
     display_img_array(img_array)
 
 
@@ -135,11 +150,33 @@ def change_to_ycrcb():
         img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2YCrCb)
         COLOR = "YCrCb"
     if COLOR == "HSV":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2YCrCb)
         COLOR = "YCrCb"
     if COLOR == "HLS":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
         COLOR = "YCrCb"
+    if COLOR == "CMY":
+        change_to_rgb(display=False)
+        change_to_hsv()
+        COLOR = "YCrCb"
+    display_img_array(img_array)
+
+
+def change_to_cmy():
+    global COLOR
+    global img_array
+    cmy = None
+    if COLOR == "RGB":
+        c = 1 - img_array[..., 0].astype(float) / 255
+        m = 1 - img_array[..., 1].astype(float) / 255
+        y = 1 - img_array[..., 2].astype(float) / 255
+        img_array = (np.dstack((c, m, y)) * 255).astype(np.uint8)
+        COLOR = "CMY"
+
+    else:
+        change_to_rgb(display=False)
+        change_to_cmy()
+
     display_img_array(img_array)
 
 
@@ -161,6 +198,7 @@ if __name__ == "__main__":
     color_menu.add_command(label="HLS", command=change_to_hls)
     color_menu.add_command(label="HSV", command=change_to_hsv)
     color_menu.add_command(label="YCrCb", command=change_to_ycrcb)
+    color_menu.add_command(label="CMY", command=change_to_cmy)
     # color_menu.add_command(label="YCoCg") # TODO: пока хз че это
     # color_menu.add_command(label="CMY")
 

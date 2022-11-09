@@ -16,6 +16,7 @@ mains.title("Image editor")
 img = None
 img_array = None
 COLOR = "RGB"  # by default
+GAMMA = 1.0
 
 
 def read_img(verbose=False):
@@ -81,11 +82,14 @@ def save():
         img.save(imgname)
 
 
-def adjust_gamma(image: np.ndarray, gamma: float=1.0) -> np.ndarray:
-    inv_gamma = 1.0 / gamma
+def adjust_gamma(display: bool = True) -> np.ndarray:
+    global img_array, GAMMA
+    inv_gamma = 1.0 / GAMMA
     table = np.array([((i / 255.0) ** inv_gamma) * 255
                       for i in np.arange(0, 256)]).astype("uint8")
-    return cv2.LUT(image, table)
+    img_array = cv2.LUT(img_array, table)
+    if display:
+        display_img_array(img_array)
 
 
 def change_to_rgb(display=True):

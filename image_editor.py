@@ -82,8 +82,8 @@ def save():
         img.save(imgname)
 
 
-def adjust_gamma(display: bool = True) -> np.ndarray:
-    global img_array, GAMMA
+def correct_gamma(display: bool = True) -> np.ndarray:
+    global img_array, GAMMA, mains
     inv_gamma = 1.0 / GAMMA
     table = np.array([((i / 255.0) ** inv_gamma) * 255
                       for i in np.arange(0, 256)]).astype("uint8")
@@ -191,6 +191,18 @@ def change_to_cmy():
     display_img_array(img_array)
 
 
+def up_gamma():
+    global GAMMA
+    GAMMA += 0.1
+    correct_gamma()
+
+
+def gamma_down():
+    global GAMMA
+    GAMMA += 0.1
+    correct_gamma()
+
+
 if __name__ == "__main__":
     panel = tk.Label(mains, bg="BLACK")
     panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
@@ -200,9 +212,16 @@ if __name__ == "__main__":
 
     file_menu = Menu(main_menu, tearoff=0)
     file_menu.add_command(label="Open", command=read_img)
-    file_menu.add_command(label="Rotate", command=rotate)
-    file_menu.add_command(label="Flip", command=flip)
     file_menu.add_command(label="Save", command=save)
+
+    transform_menu = Menu(main_menu, tearoff=0)
+    transform_menu.add_command(label="Rotate", command=rotate)
+    transform_menu.add_command(label="Flip", command=flip)
+
+    gamma_menu = Menu(main_menu, tearoff=0)
+    gamma_menu.add_command(label='set up gamma', command=up_gamma)
+    gamma_menu.add_command(label='set down gamma', command=gamma_down)
+    transform_menu.add_cascade(label='Change Gamma', menu=gamma_menu)
 
     color_menu = Menu(main_menu, tearoff=0)
     color_menu.add_command(label="RGB", command=change_to_rgb)
@@ -210,11 +229,18 @@ if __name__ == "__main__":
     color_menu.add_command(label="HSV", command=change_to_hsv)
     color_menu.add_command(label="YCrCb", command=change_to_ycrcb)
     color_menu.add_command(label="CMY", command=change_to_cmy)
+
     # color_menu.add_command(label="YCoCg") # TODO: пока хз че это
 
     main_menu.add_cascade(label="File",
                           menu=file_menu)
+
     main_menu.add_cascade(label="Colors",
                           menu=color_menu)
+
+    main_menu.add_cascade(label='Transforms',
+                          menu=transform_menu)
+
+
 
     mains.mainloop()

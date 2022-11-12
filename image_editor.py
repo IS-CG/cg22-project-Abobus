@@ -120,8 +120,28 @@ def change_to_hls():
     global img_array
     global COLOR
     if COLOR == "RGB":
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2HLS)
+        r, g, b = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :, 2].astype(float) / 255
+        maxc = np.max(img_array.astype(float) / 255, -1)
+        minc = np.min(img_array.astype(float) / 255, -1)
+        l = (minc + maxc) / 2.0
+        if np.array_equal(minc, maxc):
+            return np.zeros_like(l), l, np.zeros_like(l)
+        smask = np.greater(l, 0.5).astype(np.float32)
+
+        s = (1.0 - smask) * ((maxc - minc) / (maxc + minc)) + smask * ((maxc - minc) / (2.001 - maxc - minc))
+        rc = (maxc - r) / (maxc - minc + 0.001)
+        gc = (maxc - g) / (maxc - minc + 0.001)
+        bc = (maxc - b) / (maxc - minc + 0.001)
+
+        rmask = np.equal(r, maxc).astype(np.float32)
+        gmask = np.equal(g, maxc).astype(np.float32)
+        rgmask = np.logical_or(rmask, gmask).astype(np.float32)
+
+        h = rmask * (bc - gc) + gmask * (2.0 + rc - bc) + (1.0 - rgmask) * (4.0 + gc - rc)
+        h = np.remainder(h / 6.0, 1.0)
+        img_array = (np.dstack((h, l, s)) * 255).astype(np.uint8)
         COLOR = "HLS"
+
     if COLOR == "HSV":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2HLS)
         COLOR = "HLS"

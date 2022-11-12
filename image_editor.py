@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 from tkinter import filedialog, Menu
 import numpy as np
 from loguru import logger
+from color_functions import *
 
 from lib.utils import enforce
 
@@ -99,7 +100,18 @@ def change_to_rgb(display=True):
         img_array = cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB)
         COLOR = "RGB"
     if COLOR == "HLS":
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB)
+        h = img_array[..., 0].astype(float) / 255
+        l = img_array[..., 1].astype(float) / 255
+        s = img_array[..., 2].astype(float) / 255
+        n, m = h.shape
+        for i in range(n):
+            for j in range(m):
+                r, g, b = hls_to_rgb(h[i][j], l[i][j], s[i][j])
+                h[i][j], l[i][j], s[i][j] = r, g, b
+        h, l, s = h, l, s
+        img_array = (np.dstack((h, l, s)) * 255).astype(np.uint8)
+
+
         COLOR = "RGB"
     if COLOR == "YCrCb":
         img_array = cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB)

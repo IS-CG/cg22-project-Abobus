@@ -97,7 +97,33 @@ def change_to_rgb(display=True):
     global img_array
     global COLOR
     if COLOR == "HSV":
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB)
+        h, s, v = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
+                                                                                                  2].astype(float) / 255
+        r, g, b = np.zeros_like(h), np.zeros_like(s), np.zeros_like(v)
+        n, m = h.shape
+        for i in range(n):
+            for j in range(m):
+                if s[i][j] == 0.0:
+                    r[i][j], g[i][j], b[i][j] = v[i][j], v[i][j], v[i][j]
+                tmp = int(h[i][j] * 6.0)
+                f = (h[i][j] * 6.0) - tmp
+                p = v[i][j] * (1.0 - s[i][j])
+                q = v[i][j] * (1.0 - s[i][j] * f)
+                t = v[i][j] * (1.0 - s[i][j] * (1.0 - f))
+                tmp = tmp % 6
+                if tmp == 0:
+                    r[i][j], g[i][j], b[i][j] = v[i][j], t, p
+                if tmp == 1:
+                    r[i][j], g[i][j], b[i][j] = q, v[i][j], p
+                if tmp == 2:
+                    r[i][j], g[i][j], b[i][j] = p, v[i][j], t
+                if tmp == 3:
+                    r[i][j], g[i][j], b[i][j] = p, q, v[i][j]
+                if tmp == 4:
+                    r[i][j], g[i][j], b[i][j] = t, p, v[i][j]
+                if tmp == 5:
+                    r[i][j], g[i][j], b[i][j] = v[i][j], p, q
+        img_array = (np.dstack((r, g, b)) * 255).astype(np.uint8)
         COLOR = "RGB"
     if COLOR == "HLS":
         h = img_array[..., 0].astype(float) / 255
@@ -171,7 +197,31 @@ def change_to_hsv():
     global COLOR
     global img_array
     if COLOR == "RGB":
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2HSV)
+        r, g, b = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
+                                                                                                  2].astype(float) / 255
+        h, s, v = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
+        n, m = r.shape
+        for i in range(n):
+            for j in range(m):
+                maxc = max(r[i][j], g[i][j], b[i][j])
+                minc = min(r[i][j], g[i][j], b[i][j])
+                rangec = (maxc - minc)
+                v_t = maxc
+                if minc == maxc:
+                    h_t, s_t, v_t = 0.0, 0.0, v_t
+                s_t = rangec / maxc
+                rc = (maxc - r[i][j]) / rangec
+                gc = (maxc - g[i][j]) / rangec
+                bc = (maxc - b[i][j]) / rangec
+                if r[i][j] == maxc:
+                    h_t = bc - gc
+                elif g[i][j] == maxc:
+                    h_t = 2.0 + rc - bc
+                else:
+                    h_t = 4.0 + gc - rc
+                h_t = (h_t / 6.0) % 1.0
+                h[i][j], s[i][j], v[i][j] = h_t, s_t, v_t
+        img_array = (np.dstack((h, s, v)) * 255).astype(np.uint8)
         COLOR = "HSV"
     if COLOR == "HLS":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2HSV)

@@ -166,6 +166,22 @@ def change_to_rgb(display=True):
 
         COLOR = "RGB"
 
+    if COLOR == "YCoCg":
+        y, co, cg = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
+                                                                                        2].astype(float) / 255
+        r, g, b = np.zeros_like(y), np.zeros_like(co), np.zeros_like(cg)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                r[i][j] = y[i][j] + co[i][j] - cg[i][j]
+                g[i][j] = y[i][j] + cg[i][j]
+                b[i][j] = y[i][j] - co[i][j] - cg[i][j]
+        img_array = (np.dstack((r, g, b)) * 255).astype(np.uint8)
+
+
+
+        COLOR = "RGB"
+
     if COLOR == "CMY":
         c = 255 - img_array[..., 0].astype(float)
         m = 255 - img_array[..., 1].astype(float)
@@ -320,6 +336,26 @@ def change_to_ycrcb_709():
     display_img_array(img_array)
 
 
+def change_to_ycocg():
+    global COLOR
+    global img_array
+    if COLOR == "RGB":
+        r, g, b = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
+                                                                                      2].astype(float) / 255
+        y, co, cg = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                y[i][j] = 0.25 * r[i][j] + 0.5 * g[i][j] + 0.25 * b[i][j]
+                co[i][j] = 0.5 * r[i][j] - 0.5 * b[i][j]
+                cg[i][j] = -0.25 * r[i][j] + 0.5 * g[i][j] - 0.25 * b[i][j]
+        img_array = (np.dstack((y, co, cg)) * 255).astype(np.uint8)
+
+        COLOR = "YCoCg"
+
+    display_img_array(img_array)
+
+
 def change_to_cmy():
     global COLOR
     global img_array
@@ -376,6 +412,7 @@ if __name__ == "__main__":
     color_menu.add_command(label="HSV", command=change_to_hsv)
     color_menu.add_command(label="YCrCb_601", command=change_to_ycrcb_601)
     color_menu.add_command(label="YCrCb_709", command=change_to_ycrcb_709)
+    color_menu.add_command(label="YCoCg", command=change_to_ycocg)
     color_menu.add_command(label="CMY", command=change_to_cmy)
 
     # color_menu.add_command(label="YCoCg") # TODO: пока хз че это

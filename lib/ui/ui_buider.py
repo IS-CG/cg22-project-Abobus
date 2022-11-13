@@ -22,6 +22,7 @@ class UIBuilder:
         file_menu = Menu(main_menu, tearoff=0)
         file_menu.add_command(label="Open", command=ImageReader.read_img)
         file_menu.add_command(label="Save", command=ImageReader.save_img)
+        file_menu.add_command(label='Stash Changes', command=ImgFormatTransformer.stash_changes)
 
         transform_menu = Menu(main_menu, tearoff=0)
         transform_menu.add_command(label="Rotate", command=ImgFormatTransformer.rotate)

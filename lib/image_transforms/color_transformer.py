@@ -111,7 +111,7 @@ class ColorTransformer:
         ImageObjectSingleton.color = color
 
         if display:
-            ImageViewer.display_img_array(img_array)
+            ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @classmethod
     def change_to_hls(cls):
@@ -145,7 +145,7 @@ class ColorTransformer:
         else:
             cls.change_to_rgb(display=False)
             cls.change_to_hls()
-        ImageViewer.display_img_array(img_array)
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @classmethod
     def change_to_hsv(cls):
@@ -184,7 +184,7 @@ class ColorTransformer:
             cls.change_to_rgb(display=False)
             cls.change_to_hsv()
 
-        ImageViewer.display_img_array(img_array)
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @classmethod
     def change_to_ycrcb_601(cls):
@@ -208,7 +208,7 @@ class ColorTransformer:
         else:
             cls.change_to_rgb(display=False)
             cls.change_to_ycrcb_601()
-        ImageViewer.display_img_array(img_array)
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @classmethod
     def change_to_ycrcb_709(cls):
@@ -232,7 +232,7 @@ class ColorTransformer:
             cls.change_to_rgb(display=False)
             cls.change_to_ycrcb_709()
 
-        ImageViewer.display_img_array(img_array)
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @classmethod
     def change_to_ycocg(cls):
@@ -256,7 +256,7 @@ class ColorTransformer:
             cls.change_to_rgb(display=False)
             cls.change_to_ycocg()
 
-        ImageViewer.display_img_array(img_array)
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @classmethod
     def change_to_cmy(cls):
@@ -273,7 +273,7 @@ class ColorTransformer:
             cls.change_to_rgb(display=False)
             cls.change_to_cmy()
 
-        ImageViewer.display_img_array(img_array)
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @staticmethod
     def hls_to_rgb(h, l, s):

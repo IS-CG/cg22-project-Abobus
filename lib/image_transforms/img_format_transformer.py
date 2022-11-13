@@ -15,3 +15,8 @@ class ImgFormatTransformer:
     def flip():  # TODO: поменять на numpy
         ImageObjectSingleton.img = ImageObjectSingleton.img.transpose(Image.FLIP_LEFT_RIGHT)
         ImageViewer.display_img()
+
+    @staticmethod
+    def stash_changes():
+        ImageObjectSingleton.img_array = ImageObjectSingleton.default_img
+        ImageViewer.display_img_array(ImageObjectSingleton.default_img)

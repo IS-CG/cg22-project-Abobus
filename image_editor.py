@@ -137,10 +137,19 @@ def change_to_rgb(display=True):
         h, l, s = h, l, s
         img_array = (np.dstack((h, l, s)) * 255).astype(np.uint8)
 
-
         COLOR = "RGB"
-    if COLOR == "YCrCb":
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB)
+    if COLOR == "YCrCb_601":
+        y, cb, cr = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
+                                                                                                  2].astype(float)
+        r, g, b = np.zeros_like(y), np.zeros_like(cb), np.zeros_like(cr)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                r[i][j] = y[i][j] + 1.403 * (cr[i][j] - 128)
+                g[i][j] = y[i][j] - 0.714 * (cr[i][j] - 128) - 0.344 * (cb[i][j] - 128)
+                b[i][j] = y[i][j] + 1.773 * (cb[i][j] - 128)
+        img_array = (np.dstack((r, g, b))).astype(np.uint8)
+
         COLOR = "RGB"
 
     if COLOR == "CMY":
@@ -158,7 +167,8 @@ def change_to_hls():
     global img_array
     global COLOR
     if COLOR == "RGB":
-        r, g, b = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :, 2].astype(float) / 255
+        r, g, b = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
+                                                                                                  2].astype(float) / 255
         maxc = np.max(img_array.astype(float) / 255, -1)
         minc = np.min(img_array.astype(float) / 255, -1)
         l = (minc + maxc) / 2.0
@@ -183,7 +193,7 @@ def change_to_hls():
     if COLOR == "HSV":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2HLS)
         COLOR = "HLS"
-    if COLOR == "YCrCb":
+    if COLOR == "YCrCb_601":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HLS)
         COLOR = "HLS"
     if COLOR == "CMY":
@@ -226,7 +236,7 @@ def change_to_hsv():
     if COLOR == "HLS":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2HSV)
         COLOR = "HSV"
-    if COLOR == "YCrCb":
+    if COLOR == "YCrCb_601":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HSV)
         COLOR = "HSV"
     if COLOR == "CMY":
@@ -236,22 +246,33 @@ def change_to_hsv():
     display_img_array(img_array)
 
 
-def change_to_ycrcb():
+def change_to_ycrcb_601():
     global COLOR
     global img_array
     if COLOR == "RGB":
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2YCrCb)
-        COLOR = "YCrCb"
+        r, g, b = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
+                                                                                                  2].astype(float)
+        y, cb, cr = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                y[i][j] = 0.299 * r[i][j] + 0.587 * g[i][j] + 0.114 * b[i][j]
+                cr[i][j] = (r[i][j] - y[i][j]) * 0.713 + 128
+                cb[i][j] = (b[i][j] - y[i][j]) * 0.564 + 128
+
+        img_array = (np.dstack((y, cb, cr))).astype(np.uint8)
+
+        COLOR = "YCrCb_601"
     if COLOR == "HSV":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2YCrCb)
-        COLOR = "YCrCb"
+        COLOR = "YCrCb_601"
     if COLOR == "HLS":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
-        COLOR = "YCrCb"
+        COLOR = "YCrCb_601"
     if COLOR == "CMY":
         change_to_rgb(display=False)
         change_to_hsv()
-        COLOR = "YCrCb"
+        COLOR = "YCrCb_601"
     display_img_array(img_array)
 
 
@@ -309,7 +330,7 @@ if __name__ == "__main__":
     color_menu.add_command(label="RGB", command=change_to_rgb)
     color_menu.add_command(label="HLS", command=change_to_hls)
     color_menu.add_command(label="HSV", command=change_to_hsv)
-    color_menu.add_command(label="YCrCb", command=change_to_ycrcb)
+    color_menu.add_command(label="YCrCb_601", command=change_to_ycrcb_601)
     color_menu.add_command(label="CMY", command=change_to_cmy)
 
     # color_menu.add_command(label="YCoCg") # TODO: пока хз че это
@@ -322,7 +343,5 @@ if __name__ == "__main__":
 
     main_menu.add_cascade(label='Transforms',
                           menu=transform_menu)
-
-
 
     mains.mainloop()

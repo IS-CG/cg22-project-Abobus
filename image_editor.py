@@ -168,7 +168,8 @@ def change_to_rgb(display=True):
 
     if COLOR == "YCoCg":
         y, co, cg = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
-                                                                                        2].astype(float) / 255
+                                                                                                    2].astype(
+            float) / 255
         r, g, b = np.zeros_like(y), np.zeros_like(co), np.zeros_like(cg)
         n, m = y.shape
         for i in range(n):
@@ -177,8 +178,6 @@ def change_to_rgb(display=True):
                 g[i][j] = y[i][j] + cg[i][j]
                 b[i][j] = y[i][j] - co[i][j] - cg[i][j]
         img_array = (np.dstack((r, g, b)) * 255).astype(np.uint8)
-
-
 
         COLOR = "RGB"
 
@@ -220,16 +219,9 @@ def change_to_hls():
         img_array = (np.dstack((h, l, s)) * 255).astype(np.uint8)
         COLOR = "HLS"
 
-    if COLOR == "HSV":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2HLS)
-        COLOR = "HLS"
-    if COLOR == "YCrCb_601":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HLS)
-        COLOR = "HLS"
-    if COLOR == "CMY":
+    else:
         change_to_rgb(display=False)
         change_to_hls()
-        COLOR = "HLS"
     display_img_array(img_array)
 
 
@@ -263,16 +255,10 @@ def change_to_hsv():
                 h[i][j], s[i][j], v[i][j] = h_t, s_t, v_t
         img_array = (np.dstack((h, s, v)) * 255).astype(np.uint8)
         COLOR = "HSV"
-    if COLOR == "HLS":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2HSV)
-        COLOR = "HSV"
-    if COLOR == "YCrCb_601":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_YCrCb2RGB), cv2.COLOR_RGB2HSV)
-        COLOR = "HSV"
-    if COLOR == "CMY":
+    else:
         change_to_rgb(display=False)
         change_to_hsv()
-        COLOR = "HSV"
+
     display_img_array(img_array)
 
 
@@ -293,16 +279,9 @@ def change_to_ycrcb_601():
         img_array = (np.dstack((y, cb, cr))).astype(np.uint8)
 
         COLOR = "YCrCb_601"
-    if COLOR == "HSV":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2YCrCb)
-        COLOR = "YCrCb_601"
-    if COLOR == "HLS":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
-        COLOR = "YCrCb_601"
-    if COLOR == "CMY":
+    else:
         change_to_rgb(display=False)
-        change_to_hsv()
-        COLOR = "YCrCb_601"
+        change_to_ycrcb_601()
     display_img_array(img_array)
 
 
@@ -323,16 +302,10 @@ def change_to_ycrcb_709():
         img_array = (np.dstack((y, cb, cr))).astype(np.uint8)
 
         COLOR = "YCrCb_709"
-    if COLOR == "HSV":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2YCrCb)
-        COLOR = "YCrCb_601"
-    if COLOR == "HLS":
-        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
-        COLOR = "YCrCb_601"
-    if COLOR == "CMY":
+    else:
         change_to_rgb(display=False)
-        change_to_hsv()
-        COLOR = "YCrCb_601"
+        change_to_ycrcb_709()
+
     display_img_array(img_array)
 
 
@@ -341,7 +314,7 @@ def change_to_ycocg():
     global img_array
     if COLOR == "RGB":
         r, g, b = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
-                                                                                      2].astype(float) / 255
+                                                                                                  2].astype(float) / 255
         y, co, cg = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
         n, m = y.shape
         for i in range(n):
@@ -352,6 +325,9 @@ def change_to_ycocg():
         img_array = (np.dstack((y, co, cg)) * 255).astype(np.uint8)
 
         COLOR = "YCoCg"
+    else:
+        change_to_rgb(display=False)
+        change_to_ycocg()
 
     display_img_array(img_array)
 

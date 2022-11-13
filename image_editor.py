@@ -391,12 +391,11 @@ if __name__ == "__main__":
     color_menu.add_command(label="YCoCg", command=change_to_ycocg)
     color_menu.add_command(label="CMY", command=change_to_cmy)
 
-
     main_menu.add_cascade(label="File",
                           menu=file_menu)
 
-    main_menu.add_cascade(label="Colors",
-                          menu=color_menu)
+    transform_menu.add_cascade(label="Change Colors",
+                               menu=color_menu)
 
     main_menu.add_cascade(label='Transforms',
                           menu=transform_menu)

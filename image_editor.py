@@ -140,7 +140,7 @@ def change_to_rgb(display=True):
         COLOR = "RGB"
     if COLOR == "YCrCb_601":
         y, cb, cr = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
-                                                                                                  2].astype(float)
+                                                                                        2].astype(float)
         r, g, b = np.zeros_like(y), np.zeros_like(cb), np.zeros_like(cr)
         n, m = y.shape
         for i in range(n):
@@ -148,6 +148,20 @@ def change_to_rgb(display=True):
                 r[i][j] = y[i][j] + 1.403 * (cr[i][j] - 128)
                 g[i][j] = y[i][j] - 0.714 * (cr[i][j] - 128) - 0.344 * (cb[i][j] - 128)
                 b[i][j] = y[i][j] + 1.773 * (cb[i][j] - 128)
+        img_array = (np.dstack((r, g, b))).astype(np.uint8)
+
+        COLOR = "RGB"
+
+    if COLOR == "YCrCb_709":
+        y, cb, cr = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
+                                                                                        2].astype(float)
+        r, g, b = np.zeros_like(y), np.zeros_like(cb), np.zeros_like(cr)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                r[i][j] = y[i][j] + 1.5748 * (cr[i][j] - 128)
+                g[i][j] = y[i][j] - 0.635 * (cr[i][j] - 128) - 0.1873 * (cb[i][j] - 128)
+                b[i][j] = y[i][j] + 1.8556 * (cb[i][j] - 128)
         img_array = (np.dstack((r, g, b))).astype(np.uint8)
 
         COLOR = "RGB"
@@ -251,7 +265,7 @@ def change_to_ycrcb_601():
     global img_array
     if COLOR == "RGB":
         r, g, b = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
-                                                                                                  2].astype(float)
+                                                                                      2].astype(float)
         y, cb, cr = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
         n, m = y.shape
         for i in range(n):
@@ -263,6 +277,36 @@ def change_to_ycrcb_601():
         img_array = (np.dstack((y, cb, cr))).astype(np.uint8)
 
         COLOR = "YCrCb_601"
+    if COLOR == "HSV":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2YCrCb)
+        COLOR = "YCrCb_601"
+    if COLOR == "HLS":
+        img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HLS2RGB), cv2.COLOR_RGB2YCrCb)
+        COLOR = "YCrCb_601"
+    if COLOR == "CMY":
+        change_to_rgb(display=False)
+        change_to_hsv()
+        COLOR = "YCrCb_601"
+    display_img_array(img_array)
+
+
+def change_to_ycrcb_709():
+    global COLOR
+    global img_array
+    if COLOR == "RGB":
+        r, g, b = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
+                                                                                      2].astype(float)
+        y, cb, cr = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                y[i][j] = 0.2126 * r[i][j] + 0.7152 * g[i][j] + 0.0722 * b[i][j]
+                cr[i][j] = (r[i][j] - y[i][j]) * 0.635 + 128
+                cb[i][j] = (b[i][j] - y[i][j]) * 0.5389 + 128
+
+        img_array = (np.dstack((y, cb, cr))).astype(np.uint8)
+
+        COLOR = "YCrCb_709"
     if COLOR == "HSV":
         img_array = cv2.cvtColor(cv2.cvtColor(img_array, cv2.COLOR_HSV2RGB), cv2.COLOR_RGB2YCrCb)
         COLOR = "YCrCb_601"
@@ -331,6 +375,7 @@ if __name__ == "__main__":
     color_menu.add_command(label="HLS", command=change_to_hls)
     color_menu.add_command(label="HSV", command=change_to_hsv)
     color_menu.add_command(label="YCrCb_601", command=change_to_ycrcb_601)
+    color_menu.add_command(label="YCrCb_709", command=change_to_ycrcb_709)
     color_menu.add_command(label="CMY", command=change_to_cmy)
 
     # color_menu.add_command(label="YCoCg") # TODO: пока хз че это

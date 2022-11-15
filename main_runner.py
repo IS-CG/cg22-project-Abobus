@@ -1,6 +1,6 @@
 import yaml
 
-from ui import UIBuilder
+from lib.singleton_objects import UIBuilder
 
 with open('ui_config.yaml', 'r') as f:
     ui_conf = yaml.safe_load(f)

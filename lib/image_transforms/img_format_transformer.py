@@ -13,21 +13,21 @@ class ImgFormatTransformer:
     def rotate():  # TODO: поменять на numpy
         """
         Rotates the image 90 degrees
-        :return: None
+        : return: None
         """
         ImageObjectSingleton.img = ImageObjectSingleton.img.rotate(90)
-        ImageViewer.display_img()
-
-    @staticmethod
-    def flip():  # TODO: поменять на numpy
-        """
-        It mirrors the image horizontally
-        :return: None
-        """
-        ImageObjectSingleton.img = ImageObjectSingleton.img.transpose(Image.FLIP_LEFT_RIGHT)
         ImageViewer.display_img()
 
     @staticmethod
     def stash_changes():
         ImageObjectSingleton.img_array = ImageObjectSingleton.default_img
         ImageViewer.display_img_array(ImageObjectSingleton.default_img)
+
+    @staticmethod
+    def flip() -> None:  # TODO: поменять на numpy
+        """
+        It mirrors the image horizontally
+        : return: None
+        """
+        ImageObjectSingleton.img = ImageObjectSingleton.img.transpose(Image.FLIP_LEFT_RIGHT)
+        ImageViewer.display_img()

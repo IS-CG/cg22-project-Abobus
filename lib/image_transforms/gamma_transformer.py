@@ -42,7 +42,7 @@ class GammaTransformer:
         """
         It does decrease gamma value by 0.1
 
-        :return: None
+        : return: None
         """
         ImageObjectSingleton.gamma -= 0.1
         cls.correct_gamma()

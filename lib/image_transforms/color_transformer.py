@@ -22,7 +22,7 @@ class ColorTransformer:
         It takes image array from other color space and changes to rgb
 
         Args: display (bool): if True, it will be display image into UI after changing color space
-        :return: None
+        : return: None
         """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
@@ -130,7 +130,7 @@ class ColorTransformer:
         It takes image array from other color space and changes to hls
 
         Args: None
-        :return: None
+        : return: None
         """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
@@ -215,7 +215,7 @@ class ColorTransformer:
         It takes image array from other color space and changes to YCbCr_601
 
         Args: None
-        :return: None
+        : return: None
         """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
@@ -275,7 +275,7 @@ class ColorTransformer:
         It takes image array from other color space and changes to YCoCg
 
         Args: None
-        :return: None
+        : return: None
         """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
@@ -305,7 +305,7 @@ class ColorTransformer:
         It takes image array from other color space and changes to CMY
 
         Args: None
-        :return: None
+        : return: None
         """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
@@ -326,7 +326,7 @@ class ColorTransformer:
     def hls_to_rgb(h, l, s):
         """
         Args: h -  hue, s - saturation, s - lightness
-        :return: None
+        : return: None
         """
         def _v(m1, m2, hue):
             hue = hue % 1.0

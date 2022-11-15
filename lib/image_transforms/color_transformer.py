@@ -10,9 +10,19 @@ TWO_THIRD = 2.0 / 3.0
 
 
 class ColorTransformer:
+    """
+    A Class for transfer image from one color space to another
+
+    Args: None
+    """
     @classmethod
     def change_to_rgb(cls,
                       display=True):
+        """
+        It takes image array from other color space and changes to rgb
+
+        Args: display (bool): if True, it will be display image into UI after changing color space
+        """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
         if color == "HSV":
@@ -115,6 +125,11 @@ class ColorTransformer:
 
     @classmethod
     def change_to_hls(cls):
+        """
+        It takes image array from other color space and changes to hls
+
+        Args: None
+        """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
 
@@ -149,6 +164,11 @@ class ColorTransformer:
 
     @classmethod
     def change_to_hsv(cls):
+        """
+        It takes image array from other color space and changes to hsv
+
+        Args: None
+        """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
 
@@ -188,6 +208,11 @@ class ColorTransformer:
 
     @classmethod
     def change_to_ycrcb_601(cls):
+        """
+        It takes image array from other color space and changes to YCbCr_601
+
+        Args: None
+        """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
 
@@ -212,6 +237,11 @@ class ColorTransformer:
 
     @classmethod
     def change_to_ycrcb_709(cls):
+        """
+        It takes image array from other color space and changes to YCbCr_709
+
+        Args: None
+        """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
 
@@ -236,6 +266,11 @@ class ColorTransformer:
 
     @classmethod
     def change_to_ycocg(cls):
+        """
+        It takes image array from other color space and changes to YCoCg
+
+        Args: None
+        """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
 
@@ -260,6 +295,11 @@ class ColorTransformer:
 
     @classmethod
     def change_to_cmy(cls):
+        """
+        It takes image array from other color space and changes to CMY
+
+        Args: None
+        """
         img_array = ImageObjectSingleton.img_array
         color = ImageObjectSingleton.color
         if color == "RGB":
@@ -277,6 +317,9 @@ class ColorTransformer:
 
     @staticmethod
     def hls_to_rgb(h, l, s):
+        """
+        Args: h -  hue, s - saturation, s - lightness
+        """
         def _v(m1, m2, hue):
             hue = hue % 1.0
             if hue < ONE_SIXTH:

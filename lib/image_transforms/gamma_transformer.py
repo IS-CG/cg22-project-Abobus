@@ -28,16 +28,6 @@ class GammaTransformer:
             ImageViewer.display_img_array(img_array)
 
     @classmethod
-    def up_gamma(cls) -> None:
-        """
-        It does up gamma value by 0.1
-
-        :return: None
-        """
-        ImageObjectSingleton.gamma += 0.1
-        cls.correct_gamma()
-
-    @classmethod
     def gamma_down(cls) -> None:
         """
         It does decrease gamma value by 0.1
@@ -45,4 +35,14 @@ class GammaTransformer:
         : return: None
         """
         ImageObjectSingleton.gamma -= 0.1
+        cls.correct_gamma()
+
+    @classmethod
+    def up_gamma(cls) -> None:
+        """
+        It does up gamma value by 0.1
+
+        :return: None
+        """
+        ImageObjectSingleton.gamma += 0.1
         cls.correct_gamma()

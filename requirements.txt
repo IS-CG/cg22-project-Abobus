@@ -4,4 +4,5 @@ loguru==0.6.0
 opencv-python==4.5.5.62
 opencv-contrib-python==4.5.5.62
 pyaml==21.10.1
+numba==0.56.3
 dependency-injector==4.40.0

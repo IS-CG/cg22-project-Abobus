@@ -14,8 +14,10 @@ class UIBuilder:
         mains.geometry("1200x900")
         mains.bg = "BLUE"
         mains.title("Image editor")
-        panel = tk.Label(mains, bg="BLACK")
-        panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
+        canvas = tk.Canvas(mains, highlightthickness=0)
+        canvas.pack(fill=tk.BOTH, expand=1)
+        img_box = canvas.create_image(0, 0, image=None, anchor='nw')
+
         main_menu = Menu(mains)
         mains.config(menu=main_menu)
 
@@ -51,7 +53,8 @@ class UIBuilder:
         main_menu.add_cascade(label='Transforms',
                               menu=transform_menu)
 
-        UISingleton.panel = panel
+        UISingleton.canvas = canvas
         UISingleton.ui_main = mains
         UISingleton.menu = main_menu
+        UISingleton.img_box = img_box
 

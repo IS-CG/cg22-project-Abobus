@@ -4,5 +4,7 @@ import tkinter as tk
 
 class UISingleton(containers.DeclarativeContainer):
     ui_main = providers.Singleton(tk.Tk)
-    panel = providers.Singleton(None)
+    canvas = providers.Singleton(None)
     main_menu = providers.Singleton(None)
+    img_box = providers.Singleton(None)
+    current_elements = []

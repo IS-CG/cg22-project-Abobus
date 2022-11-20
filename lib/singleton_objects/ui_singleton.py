@@ -7,3 +7,4 @@ class UISingleton(containers.DeclarativeContainer):
     canvas = providers.Singleton(None)
     main_menu = providers.Singleton(None)
     img_box = providers.Singleton(None)
+    current_elements = []

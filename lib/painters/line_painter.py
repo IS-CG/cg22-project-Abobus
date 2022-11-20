@@ -2,7 +2,7 @@ from tkinter import Menu, simpledialog
 
 from .i_painter import IPainter
 from lib.singleton_objects import UISingleton
-from lib.ui.ui_generators import UICascadeGenerator
+from lib.ui.ui_builders import UICascadeGenerator
 
 
 class LinePainter(IPainter):
@@ -34,17 +34,34 @@ class LinePainter(IPainter):
             coords_list = [x, y, x, y]
             cls._first_dot_coords = x, y
 
-        UISingleton.canvas.create_line(*coords_list, width=cls._width, fill=cls._color)
+        line = UISingleton.canvas.create_line(*coords_list,
+                                              width=cls._width,
+                                              fill=cls._color)
+        UISingleton.current_elements.append(line)
+
 
     @classmethod
     def change_params(cls):
+
         popup_menu = Menu(UISingleton.ui_main, tearoff=0)
         popup_menu.add_command(label='Change width', command=cls.change_width_func)
+        cascade_menu = Menu(UISingleton.ui_main, tearoff=0)
 
-        color_cascade = UICascadeGenerator.generate_cascade(cascade_pattern_func=cls._change_color_func,
-                                                            cascade_items=cls._all_possible_colors)
+        cascade_menu.add_command(label='white', command=lambda: cls._change_color_func('white'))
 
-        popup_menu.add_cascade(label='Change Color', menu=color_cascade)
+        cascade_menu.add_command(label='black', command=lambda: cls._change_color_func('black'))
+
+        cascade_menu.add_command(label='red', command=lambda: cls._change_color_func('red'))
+
+        cascade_menu.add_command(label='green', command=lambda: cls._change_color_func('green'))
+
+        cascade_menu.add_command(label='cyan', command=lambda: cls._change_color_func('cyan'))
+
+        cascade_menu.add_command(label='yellow', command=lambda: cls._change_color_func('yellow'))
+
+        cascade_menu.add_command(label='magenta', command=lambda: cls._change_color_func('magenta'))
+
+        popup_menu.add_cascade(label='Change Color', menu=cascade_menu)
         return popup_menu
 
     @classmethod

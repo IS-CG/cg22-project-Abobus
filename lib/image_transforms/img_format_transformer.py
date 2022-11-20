@@ -1,9 +1,8 @@
 from PIL import Image
 
 
-from lib.singleton_objects import ImageObjectSingleton
+from lib.singleton_objects import ImageObjectSingleton, UISingleton
 from lib.image_managers import ImageViewer
-
 
 class ImgFormatTransformer:
     """
@@ -21,6 +20,8 @@ class ImgFormatTransformer:
     @staticmethod
     def stash_changes():
         ImageObjectSingleton.img_array = ImageObjectSingleton.default_img
+        for element in UISingleton.current_elements:
+            UISingleton.canvas.delete(element)
         ImageViewer.display_img_array(ImageObjectSingleton.default_img)
 
     @staticmethod

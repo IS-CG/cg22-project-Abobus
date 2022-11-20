@@ -8,6 +8,7 @@ from lib.singleton_objects import UISingleton
 from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer
 from lib.painters import LinePainter
 
+
 class UIBuilder:
     @classmethod
     def build_ui(cls):
@@ -18,22 +19,26 @@ class UIBuilder:
         mains.title("Image editor")
 
         mains.bind('<Configure>', ImageViewer.auto_image_resizer)
-
-        canvas = tk.Canvas(mains, highlightthickness=0, width=600, height=400)
-        canvas.pack(fill=tk.BOTH, expand=1)
-
-        img_box = canvas.create_image(0, 0, image=None, anchor='nw')
-
-        main_menu = Menu(mains)
-        mains.config(menu=main_menu)
-
-        UISingleton.canvas = canvas
         UISingleton.ui_main = mains
-        UISingleton.main_menu = main_menu
-        UISingleton.img_box = img_box
+        cls.build_canvas()
+        cls.build_main()
         cls.add_file_menu()
         cls.add_transform_menu()
         cls.add_paint_menu()
+
+    @staticmethod
+    def build_main():
+        main_menu = Menu(UISingleton.ui_main)
+        UISingleton.ui_main.config(menu=main_menu)
+        UISingleton.main_menu = main_menu
+
+    @staticmethod
+    def build_canvas():
+        canvas = tk.Canvas(UISingleton.ui_main, highlightthickness=0, width=600, height=400)
+        canvas.pack(fill=tk.BOTH, expand=1)
+        img_box = canvas.create_image(0, 0, image=None, anchor='nw')
+        UISingleton.canvas = canvas
+        UISingleton.img_box = img_box
 
     @staticmethod
     def add_file_menu():

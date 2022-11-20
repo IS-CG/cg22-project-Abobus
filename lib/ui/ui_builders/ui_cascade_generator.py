@@ -1,7 +1,7 @@
 from typing import Callable, List
 import types
 import functools
-
+import cv2
 from tkinter import Menu
 
 from lib.singleton_objects import UISingleton
@@ -21,7 +21,6 @@ def new_func(f: Callable, name: str) -> Callable:
     return g
 
 
-
 class UICascadeGenerator:
     @staticmethod
     def generate_cascade(cascade_pattern_func: Callable,
@@ -30,8 +29,9 @@ class UICascadeGenerator:
         cascade_menu = Menu(UISingleton.ui_main, tearoff=0)
 
         for item in cascade_items:
-            func = lambda: cascade_pattern_func(item)
-            cascade_menu.add_command(label=item, command=new_func(func, f'new_{item}_func'))
+            cascade_menu.add_command(label=item,
+                                     command=new_func(lambda: cascade_pattern_func(item),
+                                                      f'new_{item}_func'))
 
         return cascade_menu
 

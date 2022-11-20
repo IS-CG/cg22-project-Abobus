@@ -13,7 +13,6 @@ class LinePainter(IPainter):
     _old_line_coords = None
     _first_dot_coords = None
 
-
     @classmethod
     def draw_line(cls):
         UISingleton.ui_main.bind('<ButtonPress-1>', cls._draw_line)

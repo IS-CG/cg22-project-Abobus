@@ -28,7 +28,7 @@ class LinePainter(IPainter):
             coords_list = [x, y, x1, y1]
             cls._old_line_coords = coords_list
             cls._first_dot_coords = None
-            UISingleton.canvas.unbind('<ButtonPress-1>')
+            UISingleton.ui_main.unbind('<ButtonPress-1>')
         else:
             x, y = e.x, e.y
             coords_list = [x, y, x, y]
@@ -38,7 +38,6 @@ class LinePainter(IPainter):
                                               width=cls._width,
                                               fill=cls._color)
         UISingleton.current_elements.append(line)
-
 
     @classmethod
     def change_params(cls):

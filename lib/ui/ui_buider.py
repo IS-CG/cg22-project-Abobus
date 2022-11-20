@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import Menu
 
-from lib.image_managers import ImageReader
+from lib.image_managers import ImageReader, ImageViewer
 from lib.singleton_objects import UISingleton
 from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer
 
@@ -10,12 +10,16 @@ class UIBuilder:
     @staticmethod
     def build_ui():
         mains = UISingleton.ui_main()
-
-        mains.geometry("1200x900")
+        w, h = 1200, 900
+        mains.geometry(f"{w}x{h}")
         mains.bg = "BLUE"
         mains.title("Image editor")
-        canvas = tk.Canvas(mains, highlightthickness=0)
+
+        mains.bind('<Configure>', ImageViewer.auto_image_resizer)
+
+        canvas = tk.Canvas(mains, highlightthickness=0, width=600, height=400)
         canvas.pack(fill=tk.BOTH, expand=1)
+
         img_box = canvas.create_image(0, 0, image=None, anchor='nw')
 
         main_menu = Menu(mains)

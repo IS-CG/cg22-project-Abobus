@@ -27,6 +27,7 @@ class UIBuilder:
         transform_menu = Menu(main_menu, tearoff=0)
         transform_menu.add_command(label="Rotate", command=ImgFormatTransformer.rotate)
         transform_menu.add_command(label="Flip", command=ImgFormatTransformer.flip)
+        transform_menu.add_command(label="Resize", command=ImgFormatTransformer.resize)
 
         gamma_menu = Menu(main_menu, tearoff=0)
         gamma_menu.add_command(label='set up gamma', command=GammaTransformer.up_gamma)

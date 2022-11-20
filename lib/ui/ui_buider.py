@@ -29,8 +29,8 @@ class UIBuilder:
         transform_menu.add_command(label="Flip", command=ImgFormatTransformer.flip)
 
         gamma_menu = Menu(main_menu, tearoff=0)
-        gamma_menu.add_command(label='set up gamma', command=GammaTransformer.up_gamma)
-        gamma_menu.add_command(label='set down gamma', command=GammaTransformer.gamma_down)
+        gamma_menu.add_command(label='view_new_gamma', command=GammaTransformer.view_new_gamma)
+        gamma_menu.add_command(label='change current gamma', command=GammaTransformer.correct_gamma)
         transform_menu.add_cascade(label='Change Gamma', menu=gamma_menu)
 
         color_menu = Menu(main_menu, tearoff=0)

@@ -3,7 +3,7 @@ from copy import deepcopy
 
 import numpy as np
 from loguru import logger
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 from lib.utils import enforce
 from lib.singleton_objects import ImageObjectSingleton
@@ -22,8 +22,9 @@ class ImageReader:
         valid_extensions = [".pnm", ".ppm", ".pgm", ".PNM", ".PPM", ".PGM"]
         enforce(isinstance(filespec, str) and len(filespec) >= 5,
                 "filespec must be a string of length >= 5, was %r." % (filespec))
-        enforce(filespec[-4:] in valid_extensions,
-                "file extension must be .pnm, .ppm, or .pgm; was %s." % (filespec[-4:]))
+        if not filespec[-4:] in valid_extensions:
+            messagebox.showerror('User Input Error',
+                                 "file extension must be .pnm, .ppm, or .pgm; was %s." % (filespec[-4:]))
         with open(filespec, "rb") as f:
             buf = f.read()
             regex_pnm_header = b"(^(P[56])\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s)"

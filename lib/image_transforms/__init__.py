@@ -1,3 +1,4 @@
 from .gamma_transformer import GammaTransformer
 from .color_transformer import ColorTransformer
 from .img_format_transformer import ImgFormatTransformer
+from .dithering_transformer import DitheringTransformer

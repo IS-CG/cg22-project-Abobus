@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Callable, List
 
 import tkinter as tk
@@ -84,4 +85,18 @@ class UIBuilder:
         UISingleton.main_menu.add_cascade(label='Painting',
                                           menu=paint_menu)
 
+    @staticmethod
+    def add_channels_menu():
+        channels_menu = Menu(UISingleton.ui_main, tearoff=0)
+
+        rgb_menu = Menu(UISingleton.ui_main, tearoff=0)
+        r_channel = partial(ColorTransformer.edit_channels, channel_1=1, channel_2=0, channel_3=0)
+        rgb_menu.add_command(label="r", command=r_channel)
+        # rgb_menu.add_command(label="g", command=)
+        # rgb_menu.add_command(label="b", command=)
+        # rgb_menu.add_command(label="rg", command=)
+        # rgb_menu.add_command(label="rb", command=)
+        # rgb_menu.add_command(label="gb", command=)
+        channels_menu.add_cascade(label='RGB', menu=rgb_menu)
+        UISingleton.main_menu.add_cascade(label='Edit channels', menu=channels_menu)
 

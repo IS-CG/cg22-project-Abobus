@@ -346,3 +346,13 @@ class ColorTransformer:
             m2 = l + s - (l * s)
         m1 = 2.0 * l - m2
         return _v(m1, m2, h + ONE_THIRD), _v(m1, m2, h), _v(m1, m2, h - ONE_THIRD)
+
+    @classmethod
+    def edit_channels(cls, channel_1, channel_2, channel_3):
+        img_array = ImageObjectSingleton.img_array
+        if channel_1 and not channel_2 and not channel_3:
+            img_array[:, :, 1] *= 0
+            img_array[:, :, 2] *= 0
+
+        ImageObjectSingleton.img_array = img_array
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)

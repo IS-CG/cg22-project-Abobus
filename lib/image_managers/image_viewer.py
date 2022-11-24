@@ -3,12 +3,14 @@ from functools import partial
 from PIL import Image, ImageTk
 import tkinter as tk
 import numpy as np
+from numba import njit
 import cv2
 
 from lib.singleton_objects import UISingleton, ImageObjectSingleton
 
 
 class ImageViewer:
+
     @staticmethod
     def display_img():
         image = ImageTk.PhotoImage(ImageObjectSingleton.img)

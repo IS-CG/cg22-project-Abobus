@@ -78,6 +78,8 @@ class UIBuilder:
         dithering_algo_menu.add_command(label='ordered', command=partial(DitheringTransformer.do_dithering, 'ordered'))
         dithering_algo_menu.add_command(label='random', command=partial(DitheringTransformer.do_dithering, 'random'))
         dithering_algo_menu.add_command(label='floyd-steinberg', command=partial(DitheringTransformer.do_dithering, 'floyd-steinberg'))
+        dithering_algo_menu.add_command(label='floyd-steinberg-rgb',
+                                        command=partial(DitheringTransformer.do_dithering, 'floyd-steinberg', 'rgb'))
         dithering_algo_menu.add_command(label='atkinston', command=partial(DitheringTransformer.do_dithering, 'atkinston'))
 
         dithering_menu.add_cascade(label='apply dithering', menu=dithering_algo_menu)

@@ -22,7 +22,7 @@ class DitheringTransformer:  # todo refactore to strategy pattern
     _dithered_img = None
 
     @classmethod
-    def do_dithering(cls, method_name: str, launch_type: str = 'rgb'):
+    def do_dithering(cls, method_name: str):
         if not (type(ImageObjectSingleton.img_array) is np.ndarray):
             messagebox.showerror('User Input Error', 'You need to apply dithering first!')
             return None
@@ -44,7 +44,8 @@ class DitheringTransformer:  # todo refactore to strategy pattern
 
         elif method_name == 'atkinston':
             dithered_img = cls._atkinson_dithering(img_array)
-
+        if dithered_img.shape[2] == 1:
+            dithered_img = dithered_img.reshape(dithered_img.shape[:2])
         cls._dithered_img = dithered_img
 
     @classmethod
@@ -212,7 +213,7 @@ def left_color(p_color: np.ndarray, nc):
     return n_color
 
 
-# @njit
+@njit
 def get_new_color(color: np.ndarray, matrix_elem: int, nc: int) -> int:
     l_c = left_color(color, nc)
 

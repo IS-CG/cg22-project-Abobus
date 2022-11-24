@@ -5,7 +5,8 @@ from tkinter import Menu
 
 from lib.image_managers import ImageReader, ImageViewer
 from lib.singleton_objects import UISingleton
-from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer, DitheringTransformer
+from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer,DitheringTransformer
+
 from lib.painters import LinePainter
 
 

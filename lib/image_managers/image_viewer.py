@@ -23,7 +23,7 @@ class ImageViewer:
             return None
 
         img = ImageObjectSingleton.img_array
-        h, w, c = ImageObjectSingleton.img_array.shape
+        h, w = ImageObjectSingleton.img_array.shape[:2]
         if e.width < w or e.height < h:
             new_w = e.width if e.width < w else w
             new_h = e.height if e.height < h else h

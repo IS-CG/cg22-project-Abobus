@@ -6,5 +6,5 @@ class ImageObjectSingleton(containers.DeclarativeContainer):
     img_array = providers.Singleton(None)
     color = "RGB"
     gamma = 1.0
-    last_gamma = 1.0
+    last_gamma = None
     default_img = providers.Singleton(None)

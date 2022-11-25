@@ -15,7 +15,6 @@ class GammaTransformer:
     Args: None
     """
 
-
     @classmethod
     def correct_gamma(cls) -> None:
         """
@@ -30,7 +29,7 @@ class GammaTransformer:
             messagebox.showerror('USER INPUT ERROR', 'GAMMA MUST BE > 0')
         else:
             ImageObjectSingleton.last_gamma = ImageObjectSingleton.gamma
-            ImageObjectSingleton.gamma = value if value > 0.1 else ImageObjectSingleton.gamma
+            ImageObjectSingleton.gamma = value  # if value > 0.1 else ImageObjectSingleton.gamma
 
     @classmethod
     def view_new_gamma(cls, display: bool = True) -> None:
@@ -57,10 +56,12 @@ class GammaTransformer:
         r1 = np.zeros((img_row, img_column, channels), dtype=np.float64)
         for i in range(img_row):
             for j in range(img_column):
-                if inv_gamma <= 0.0031308:
-                    r1[i, j] = np.array([floor(255.0 * linear_to_srgb(item) + 0.5) for item in img[i, j]])
-                elif last_gamma == 0:
-                    r1[i, j] = np.array([srgb_to_linear(item) for item in img[i, j]])
+                if not(last_gamma is None) and last_gamma == 0:
+                    r1[i, j] = np.array([default_gamma(srgb_to_linear(item),
+                                                       gamma=inv_gamma) for item in img[i, j]])
+                elif inv_gamma == 0:
+                    r1[i, j] = np.array([(linear_to_srgb(item / 255)) * 255 for item in img[i, j]])
+
                 else:
                     r1[i, j] = np.array([default_gamma(item, gamma=inv_gamma) for item in img[i, j]])
         return r1
@@ -71,13 +72,13 @@ def linear_to_srgb(value: float) -> float:
     if value <= 0.0031308:
         return value * 12.92
     else:
-        return value ** (1.0/2.4) * 1.055 - 0.055
+        return 1.055 * (value ** 0.41666) - 0.055
 
 
 @njit
 def srgb_to_linear(value: float) -> float:
     if value <= 0.04045:
-       return value / 12.92
+        return value / 12.92
     else:
         return ((value + 0.055) / 1.055) ** 2.4
 

@@ -137,8 +137,9 @@ class DitheringTransformer:  # todo refactore to strategy pattern
                 for x in range(w):
                     pixel = dithered[y, x].copy()
                     new_pixel = np.array([get_new_color(channel, nc) for channel in pixel])
-                    error = (new_pixel - pixel) * 0.125
+                    error = (pixel - new_pixel) * 0.125
                     for idx in [[x + 1, y], [x + 2, y],
+                                [x + 1, y+1],
                                 [x, y + 1], [x, y + 2]]:
                         try:
                             dithered[idx[1], idx[0]] += error.astype(np.uint8)

@@ -4,6 +4,7 @@ from PIL import Image
 from lib.singleton_objects import ImageObjectSingleton, UISingleton
 from lib.image_managers import ImageViewer
 
+
 class ImgFormatTransformer:
     """
     A class that doing some geometric transformation with image

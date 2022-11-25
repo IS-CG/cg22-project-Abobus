@@ -114,13 +114,13 @@ class UIBuilder:
         hl_channel = partial(ColorTransformer.edit_channels, channels=[2])
         hs_channel = partial(ColorTransformer.edit_channels, channels=[1])
         ls_channel = partial(ColorTransformer.edit_channels, channels=[0])
-        hls_menu.add_command(label="r", command=h_channel)
-        hls_menu.add_command(label="g", command=l_channel)
-        hls_menu.add_command(label="b", command=s_channel)
-        hls_menu.add_command(label="rg", command=hl_channel)
-        hls_menu.add_command(label="rb", command=hs_channel)
-        hls_menu.add_command(label="gb", command=ls_channel)
+        hls_menu.add_command(label="h", command=h_channel)
+        hls_menu.add_command(label="l", command=l_channel)
+        hls_menu.add_command(label="s", command=s_channel)
+        hls_menu.add_command(label="hl", command=hl_channel)
+        hls_menu.add_command(label="hs", command=hs_channel)
+        hls_menu.add_command(label="ls", command=ls_channel)
         channels_menu.add_cascade(label='HLS', menu=hls_menu)
-        
+
         UISingleton.main_menu.add_cascade(label='Edit channels', menu=channels_menu)
 

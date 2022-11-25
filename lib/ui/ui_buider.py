@@ -1,12 +1,13 @@
 from typing import Callable, List
-
+from functools import partial
 import tkinter as tk
 from tkinter import Menu
 
 from lib.image_managers import ImageReader, ImageViewer
 from lib.singleton_objects import UISingleton
-from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer
-from lib.painters import LinePainter
+from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer,DitheringTransformer
+
+from lib.painters import LinePainter, GradientPainter
 
 
 class UIBuilder:
@@ -73,6 +74,20 @@ class UIBuilder:
         transform_menu.add_cascade(label="Change Colors",
                                    menu=color_menu)
 
+        dithering_menu = Menu(UISingleton.ui_main, tearoff=0)
+        dithering_algo_menu = Menu(dithering_menu, tearoff=0)
+        dithering_algo_menu.add_command(label='ordered', command=partial(DitheringTransformer.do_dithering, 'ordered'))
+        dithering_algo_menu.add_command(label='random', command=partial(DitheringTransformer.do_dithering, 'random'))
+        dithering_algo_menu.add_command(label='floyd-steinberg', command=partial(DitheringTransformer.do_dithering, 'floyd-steinberg'))
+        dithering_algo_menu.add_command(label='atkinston', command=partial(DitheringTransformer.do_dithering, 'atkinston'))
+
+        dithering_menu.add_cascade(label='apply dithering', menu=dithering_algo_menu)
+        dithering_menu.add_command(label='view_current_dithering', command=DitheringTransformer.view_current_dithering)
+        dithering_menu.add_command(label='change current color depth', command=DitheringTransformer.change_current_color_depth)
+
+        transform_menu.add_cascade(label="Dithering",
+                                   menu=dithering_menu)
+
         UISingleton.main_menu.add_cascade(label='Transforms',
                                           menu=transform_menu)
 
@@ -81,7 +96,9 @@ class UIBuilder:
         paint_menu = Menu(UISingleton.ui_main, tearoff=0)
         paint_menu.add_command(label="draw_line", command=LinePainter.draw_line)
         paint_menu.add_cascade(label="change_line_params", menu=LinePainter.change_params())
+        paint_menu.add_cascade(label='Draw Gradient', menu=GradientPainter.get_the_menu())
         UISingleton.main_menu.add_cascade(label='Painting',
                                           menu=paint_menu)
+
 
 

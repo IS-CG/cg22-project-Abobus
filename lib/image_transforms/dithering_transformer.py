@@ -119,7 +119,6 @@ class DitheringTransformer:  # todo refactore to strategy pattern
     def _atkinson_dithering(cls,
                             image: np.ndarray,
                             ) -> np.ndarray:
-        # @njit
         def get_new_color(color: np.ndarray, nc):
             color = color.astype(np.float64)
             c_c = 0
@@ -132,8 +131,6 @@ class DitheringTransformer:  # todo refactore to strategy pattern
                     break
                 prev_c = abs(c_c - color)
             return c_c if c_c > 0 else 0
-
-        # @njit
         def calculate_atkinson(dithered: np.ndarray) -> np.ndarray:
             new_matrix = np.zeros(dithered.shape)
             for y in range(h):

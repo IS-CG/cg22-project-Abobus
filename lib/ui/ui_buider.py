@@ -26,6 +26,7 @@ class UIBuilder:
         cls.add_file_menu()
         cls.add_transform_menu()
         cls.add_paint_menu()
+        cls.add_channels_menu()
 
     @staticmethod
     def build_main():
@@ -90,8 +91,12 @@ class UIBuilder:
         channels_menu = Menu(UISingleton.ui_main, tearoff=0)
 
         rgb_menu = Menu(UISingleton.ui_main, tearoff=0)
-        r_channel = partial(ColorTransformer.edit_channels, channel_1=1, channel_2=0, channel_3=0)
+        r_channel = partial(ColorTransformer.edit_channels, channels=[1, 2])
+        g_channel = partial(ColorTransformer.edit_channels, channels=[0, 2])
+        b_channel = partial(ColorTransformer.edit_channels, channels=[0, 1])
         rgb_menu.add_command(label="r", command=r_channel)
+        rgb_menu.add_command(label="g", command=g_channel)
+        rgb_menu.add_command(label="b", command=b_channel)
         # rgb_menu.add_command(label="g", command=)
         # rgb_menu.add_command(label="b", command=)
         # rgb_menu.add_command(label="rg", command=)

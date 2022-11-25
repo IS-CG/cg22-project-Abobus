@@ -90,18 +90,37 @@ class UIBuilder:
     def add_channels_menu():
         channels_menu = Menu(UISingleton.ui_main, tearoff=0)
 
+        # rgb channels:
         rgb_menu = Menu(UISingleton.ui_main, tearoff=0)
         r_channel = partial(ColorTransformer.edit_channels, channels=[1, 2])
         g_channel = partial(ColorTransformer.edit_channels, channels=[0, 2])
         b_channel = partial(ColorTransformer.edit_channels, channels=[0, 1])
+        rg_channel = partial(ColorTransformer.edit_channels, channels=[2])
+        rb_channel = partial(ColorTransformer.edit_channels, channels=[1])
+        gb_channel = partial(ColorTransformer.edit_channels, channels=[0])
         rgb_menu.add_command(label="r", command=r_channel)
         rgb_menu.add_command(label="g", command=g_channel)
         rgb_menu.add_command(label="b", command=b_channel)
-        # rgb_menu.add_command(label="g", command=)
-        # rgb_menu.add_command(label="b", command=)
-        # rgb_menu.add_command(label="rg", command=)
-        # rgb_menu.add_command(label="rb", command=)
-        # rgb_menu.add_command(label="gb", command=)
+        rgb_menu.add_command(label="rg", command=rg_channel)
+        rgb_menu.add_command(label="rb", command=rb_channel)
+        rgb_menu.add_command(label="gb", command=gb_channel)
         channels_menu.add_cascade(label='RGB', menu=rgb_menu)
+
+        # hls channels:
+        hls_menu = Menu(UISingleton.ui_main, tearoff=0)
+        h_channel = partial(ColorTransformer.edit_channels, channels=[1, 2])
+        l_channel = partial(ColorTransformer.edit_channels, channels=[0, 2])
+        s_channel = partial(ColorTransformer.edit_channels, channels=[0, 1])
+        hl_channel = partial(ColorTransformer.edit_channels, channels=[2])
+        hs_channel = partial(ColorTransformer.edit_channels, channels=[1])
+        ls_channel = partial(ColorTransformer.edit_channels, channels=[0])
+        hls_menu.add_command(label="r", command=h_channel)
+        hls_menu.add_command(label="g", command=l_channel)
+        hls_menu.add_command(label="b", command=s_channel)
+        hls_menu.add_command(label="rg", command=hl_channel)
+        hls_menu.add_command(label="rb", command=hs_channel)
+        hls_menu.add_command(label="gb", command=ls_channel)
+        channels_menu.add_cascade(label='HLS', menu=hls_menu)
+        
         UISingleton.main_menu.add_cascade(label='Edit channels', menu=channels_menu)
 

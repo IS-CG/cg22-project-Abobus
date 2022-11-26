@@ -21,6 +21,7 @@ class ImgFormatTransformer:
     @staticmethod
     def stash_changes():
         ImageObjectSingleton.img_array = ImageObjectSingleton.default_img
+        ImageObjectSingleton.color = "RGB"
         for element in UISingleton.current_elements:
             UISingleton.canvas.delete(element)
         ImageViewer.display_img_array(ImageObjectSingleton.default_img)

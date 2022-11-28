@@ -6,6 +6,37 @@ from lib.image_managers import ImageViewer
 import math
 
 
+def padding(img, H, W, C):
+    zimg = np.zeros((H + 4, W + 4, C))
+    zimg[2:H + 2, 2:W + 2, :C] = img
+
+    # Pad the first/last two col and row
+    zimg[2:H + 2, 0:2, :C] = img[:, 0:1, :C]
+    zimg[H + 2:H + 4, 2:W + 2, :] = img[H - 1:H, :, :]
+    zimg[2:H + 2, W + 2:W + 4, :] = img[:, W - 1:W, :]
+    zimg[0:2, 2:W + 2, :C] = img[0:1, :, :C]
+
+    # Pad the missing eight points
+    zimg[0:2, 0:2, :C] = img[0, 0, :C]
+    zimg[H + 2:H + 4, 0:2, :C] = img[H - 1, 0, :C]
+    zimg[H + 2:H + 4, W + 2:W + 4, :C] = img[H - 1, W - 1, :C]
+    zimg[0:2, W + 2:W + 4, :C] = img[0, W - 1, :C]
+
+    return zimg
+
+
+def bicubic_kernel(x, B=1 / 3., C=1 / 3.):
+    """https://de.wikipedia.org/wiki/Mitchell-Netravali-Filter"""
+    if abs(x) < 1:
+        return 1 / 6. * ((12 - 9 * B - 6 * C) * abs(x) ** 3 + ((-18 + 12 * B + 6 * C) * abs(x) ** 2 + (6 - 2 * B)))
+    elif 1 <= abs(x) < 2:
+        return 1 / 6. * (
+                (-B - 6 * C) * abs(x) ** 3 + (6 * B + 30 * C) * abs(x) ** 2 + (-12 * B - 48 * C) * abs(x) + (
+                8 * B + 24 * C))
+    else:
+        return 0
+
+
 class ImgFormatTransformer:
     """
     A class that doing some geometric transformation with image
@@ -43,7 +74,7 @@ class ImgFormatTransformer:
         return r[col][row], g[col][row], b[col][row]
 
     @staticmethod
-    def resize_neighbour(): # TODO: сделать конфигурируемые размеры(пока что впадлу менять на partial)
+    def resize_neighbour():  # TODO: сделать конфигурируемые размеры(пока что впадлу менять на partial)
         img = ImageObjectSingleton.img
         img_array = ImageObjectSingleton.img_array
         factor = 2
@@ -62,16 +93,11 @@ class ImgFormatTransformer:
 
         img_array = (np.dstack((r, g, b))).astype(np.uint8)
 
-
         ImageObjectSingleton.img_array = img_array
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @staticmethod
     def bilinear_resize():
-        """
-        `image` is a 2-D numpy array
-        `height` and `width` are the desired spatial dimension of the new 2-D array.
-        """
         height, width = 800, 600
         image = ImageObjectSingleton.img_array
         img_height, img_width = image.shape[:2]
@@ -102,4 +128,65 @@ class ImgFormatTransformer:
                 resized[i][j] = pixel
 
         ImageObjectSingleton.img_array = resized
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+
+    @staticmethod
+    def bicubic():
+        ratio = 0.5
+        img = ImageObjectSingleton.img_array
+        H, W, C = img.shape
+
+        img = padding(img, H, W, C)
+
+        dH = math.floor(H * ratio)
+        dW = math.floor(W * ratio)
+
+        dst = np.zeros((dH, dW, 3))
+
+        h = 1 / ratio
+
+        for c in range(C):
+            for j in range(dH):
+                for i in range(dW):
+                    # Getting the coordinates of the
+                    # nearby values
+                    x, y = i * h + 2, j * h + 2
+
+                    x1 = 1 + x - math.floor(x)
+                    x2 = x - math.floor(x)
+                    x3 = math.floor(x) + 1 - x
+                    x4 = math.floor(x) + 2 - x
+
+                    y1 = 1 + y - math.floor(y)
+                    y2 = y - math.floor(y)
+                    y3 = math.floor(y) + 1 - y
+                    y4 = math.floor(y) + 2 - y
+
+                    # Considering all nearby 16 values
+                    mat_l = np.matrix(
+                        [[bicubic_kernel(x1), bicubic_kernel(x2), bicubic_kernel(x3), bicubic_kernel(x4)]])
+                    mat_m = np.matrix([[img[int(y - y1), int(x - x1), c],
+                                        img[int(y - y2), int(x - x1), c],
+                                        img[int(y + y3), int(x - x1), c],
+                                        img[int(y + y4), int(x - x1), c]],
+                                       [img[int(y - y1), int(x - x2), c],
+                                        img[int(y - y2), int(x - x2), c],
+                                        img[int(y + y3), int(x - x2), c],
+                                        img[int(y + y4), int(x - x2), c]],
+                                       [img[int(y - y1), int(x + x3), c],
+                                        img[int(y - y2), int(x + x3), c],
+                                        img[int(y + y3), int(x + x3), c],
+                                        img[int(y + y4), int(x + x3), c]],
+                                       [img[int(y - y1), int(x + x4), c],
+                                        img[int(y - y2), int(x + x4), c],
+                                        img[int(y + y3), int(x + x4), c],
+                                        img[int(y + y4), int(x + x4), c]]])
+                    mat_r = np.matrix(
+                        [[bicubic_kernel(y1)], [bicubic_kernel(y2)], [bicubic_kernel(y3)], [bicubic_kernel(y4)]])
+
+                    # Here the dot function is used to get the dot
+                    # product of 2 matrices
+                    dst[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)
+
+        ImageObjectSingleton.img_array = dst.astype(np.uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)

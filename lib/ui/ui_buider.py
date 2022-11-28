@@ -6,8 +6,7 @@ from tkinter import Menu
 
 from lib.image_managers import ImageReader, ImageViewer
 from lib.singleton_objects import UISingleton
-from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer, DitheringTransformer, \
-    resize_transformer
+from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer, DitheringTransformer
 
 from lib.painters import LinePainter, GradientPainter
 
@@ -61,6 +60,7 @@ class UIBuilder:
         transform_menu.add_command(label="Flip", command=ImgFormatTransformer.flip)
         transform_menu.add_command(label="Resize_neighbour", command=ImgFormatTransformer.resize_neighbour)
         transform_menu.add_command(label="Resize bilinear", command=ImgFormatTransformer.bilinear_resize)
+        transform_menu.add_command(label="Resize bicubic", command=ImgFormatTransformer.bicubic)
 
         gamma_menu = Menu(UISingleton.ui_main, tearoff=0)
         gamma_menu.add_command(label='view_new_gamma', command=GammaTransformer.view_new_gamma)

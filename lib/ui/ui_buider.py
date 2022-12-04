@@ -61,8 +61,7 @@ class UIBuilder:
         transform_menu.add_command(label="Flip", command=ImgFormatTransformer.flip)
         transform_menu.add_command(label="Resize_neighbour", command=ImgFormatTransformer.resize_neighbour)
         transform_menu.add_command(label="Resize bilinear", command=ImgFormatTransformer.bilinear_resize)
-        mitchell = partial(ImgFormatTransformer.mitchell, ratio = 0.5, B_m=0, C_m=0.5)
-        transform_menu.add_command(label="Resize mitchell", command=mitchell)
+        transform_menu.add_command(label="Resize mitchell", command=ImgFormatTransformer.mitchell)
         transform_menu.add_command(label="Resize lanczos", command=ImgFormatTransformer.lanczos)
 
         gamma_menu = Menu(UISingleton.ui_main, tearoff=0)

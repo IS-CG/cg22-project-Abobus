@@ -1,4 +1,6 @@
 from PIL import Image
+from tkinter import simpledialog
+from numba import njit
 import numpy as np
 
 from lib.image_transforms.image_kernels import padding, bicubic_kernel, lanczos_filter
@@ -47,7 +49,8 @@ class ImgFormatTransformer:
     def resize_neighbour():  # TODO: сделать конфигурируемые размеры(пока что впадлу менять на partial)
         img = ImageObjectSingleton.img
         img_array = ImageObjectSingleton.img_array
-        factor = 2
+        factor = simpledialog.askfloat(title="Type a factor value", prompt="Try not to use big values",
+                                       parent=UISingleton.ui_main)
 
         W, H = img.size
         newW = int(W * factor)
@@ -68,10 +71,11 @@ class ImgFormatTransformer:
 
     @staticmethod
     def bilinear_resize():
-        height, width = 800, 600
         image = ImageObjectSingleton.img_array
         img_height, img_width = image.shape[:2]
-
+        factor = simpledialog.askfloat(title="Type a factor value", prompt="Try not to use big values",
+                                       parent=UISingleton.ui_main)
+        height, width = int(img_height * factor), int(img_width * factor)
         resized = np.array(Image.new('RGB', (width, height)))
 
         x_ratio = float(img_width - 1) / (width - 1) if width > 1 else 0
@@ -101,7 +105,11 @@ class ImgFormatTransformer:
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @staticmethod
-    def mitchell(ratio, B_m, C_m):
+    def mitchell():
+        ratio = simpledialog.askfloat(title="Type a factor value", prompt="Try not to use big values",
+                                      parent=UISingleton.ui_main)
+        B_m = simpledialog.askfloat(title="Type a B_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
+        C_m = simpledialog.askfloat(title="Type a C_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
         img = ImageObjectSingleton.img_array
         H, W, C = img.shape
 
@@ -133,7 +141,8 @@ class ImgFormatTransformer:
 
                     # Considering all nearby 16 values
                     mat_l = np.matrix(
-                        [[bicubic_kernel(x1, B_m, C_m), bicubic_kernel(x2, B_m, C_m), bicubic_kernel(x3, B_m, C_m), bicubic_kernel(x4, B_m, C_m)]])
+                        [[bicubic_kernel(x1, B_m, C_m), bicubic_kernel(x2, B_m, C_m), bicubic_kernel(x3, B_m, C_m),
+                          bicubic_kernel(x4, B_m, C_m)]])
                     mat_m = np.matrix([[img[int(y - y1), int(x - x1), c],
                                         img[int(y - y2), int(x - x1), c],
                                         img[int(y + y3), int(x - x1), c],
@@ -151,7 +160,8 @@ class ImgFormatTransformer:
                                         img[int(y + y3), int(x + x4), c],
                                         img[int(y + y4), int(x + x4), c]]])
                     mat_r = np.matrix(
-                        [[bicubic_kernel(y1, B_m, C_m)], [bicubic_kernel(y2, B_m, C_m)], [bicubic_kernel(y3, B_m, C_m)], [bicubic_kernel(y4, B_m, C_m)]])
+                        [[bicubic_kernel(y1, B_m, C_m)], [bicubic_kernel(y2, B_m, C_m)], [bicubic_kernel(y3, B_m, C_m)],
+                         [bicubic_kernel(y4, B_m, C_m)]])
 
                     # Here the dot function is used to get the dot
                     # product of 2 matrices
@@ -162,7 +172,8 @@ class ImgFormatTransformer:
 
     @staticmethod
     def lanczos():
-        ratio = 0.5
+        ratio = simpledialog.askfloat(title="Type a factor value", prompt="Try not to use big values",
+                                      parent=UISingleton.ui_main)
         img = ImageObjectSingleton.img_array
         H, W, C = img.shape
 
@@ -176,6 +187,7 @@ class ImgFormatTransformer:
         h = 1 / ratio
 
         for c in range(C):
+            print(c)
             for j in range(dH):
                 for i in range(dW):
                     # Getting the coordinates of the

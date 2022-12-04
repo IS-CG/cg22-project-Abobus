@@ -50,7 +50,7 @@ class UIBuilder:
         file_menu.add_command(label="Open", command=ImageReader.read_img)
         file_menu.add_command(label="Save", command=ImageReader.save_img)
         file_menu.add_command(label='Stash Changes', command=ImageViewer.stash_changes)
-        file_menu.add_command(label='Move img', command=ImageViewer.move_img)
+        file_menu.add_command(label='Move img', command=ImageViewer.move_img_menu)
 
         UISingleton.main_menu.add_cascade(label="File",
                                           menu=file_menu)

@@ -2,7 +2,7 @@ from functools import partial
 
 from PIL import Image, ImageTk
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import simpledialog, messagebox, Menu
 import numpy as np
 import cv2
 
@@ -55,39 +55,45 @@ class ImageViewer:
         canvas.image = img
 
     @staticmethod
-    def get_new_img_center_by_user_input():
+    def move_to_new_img_center_by_user_input():
+        """
+        moves image to new center by user input
+        """
         new_center_x = int(simpledialog.askstring("Input", "Enter center X coordinate:"))
         new_center_y = int(simpledialog.askstring("Input", "Enter center Y coordinate:"))
 
         x = int(new_center_x - ImageObjectSingleton.img.width // 2)
         y = int(new_center_y - ImageObjectSingleton.img.height // 2)
-
-        return x, y
-
+        UISingleton.canvas.move(UISingleton.img_box, x, y)
 
     @classmethod
-    def move_img(cls):
-        """
-        Move image to new center by user input
-        """
-        choice = messagebox.askquestion(title='Change center coords',
-                                        message='Click "No" to mouse transfer, Click "Yes" to enter coordinates',                                        parent=UISingleton.ui_main,
-                                        type='yesnocancel', default='yes', icon='question')
+    def move_img_menu(cls):
+        """creates move img menu"""
+ 
+        popup = Menu(UISingleton.main_menu, tearoff=0)
+        popup.add_command(label="Mouse", command=partial(UISingleton.canvas.bind,
+                                                         "<Button-1>", cls.move_by_mouse_click))
+        
+        popup.add_separator()
 
-        if choice == 'no':
-            UISingleton.canvas.bind("<Button-1>", cls.move_by_mouse_click)
-        elif choice == 'yes':
-            x_coord, y_coord = cls.get_new_img_center_by_user_input()
-            UISingleton.canvas.move(UISingleton.img_box, x_coord, y_coord)
-        else:
-            pass
+        popup.add_command(label="Keyword Coords", command=cls.move_to_new_img_center_by_user_input)
+
+        try:
+            popup.tk_popup(ImageObjectSingleton.img.width // 2, ImageObjectSingleton.img.height // 2)
+        finally:
+            #Release the grab
+            popup.grab_release()
+
 
     @staticmethod
     def move_by_mouse_click(event) -> tuple[int, int]:
         """
         return user click coordinates
         """
-        UISingleton.canvas.coords(UISingleton.img_box, event.x, event.y)
+        new_center_x = int(event.x - ImageObjectSingleton.img.width // 2)
+        new_center_y = int(event.y - ImageObjectSingleton.img.height // 2)
+
+        UISingleton.canvas.coords(UISingleton.img_box, new_center_x, new_center_y)
         UISingleton.canvas.unbind("<Button-1>")
 
 

@@ -47,7 +47,6 @@ class ImgFormatTransformer:
 
     @staticmethod
     def resize_neighbour():
-        img = ImageObjectSingleton.img
         img_array = ImageObjectSingleton.img_array
         height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
                                        parent=UISingleton.ui_main))
@@ -113,28 +112,33 @@ class ImgFormatTransformer:
 
     @staticmethod
     def mitchell():
-        ratio = simpledialog.askfloat(title="Type a factor value", prompt="Try not to use big values",
-                                      parent=UISingleton.ui_main)
+        height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
+                                           parent=UISingleton.ui_main))
+        width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
+                                          parent=UISingleton.ui_main))
         B_m = simpledialog.askfloat(title="Type a B_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
         C_m = simpledialog.askfloat(title="Type a C_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
         img = ImageObjectSingleton.img_array
         H, W, C = img.shape
 
+        x_ratio = float(W - 1) / (width - 1) if width > 1 else 0
+        y_ratio = float(H - 1) / (height - 1) if height > 1 else 0
+
         img = padding(img, H, W, C)
 
-        dH = math.floor(H * ratio)
-        dW = math.floor(W * ratio)
+        dH = height
+        dW = width
 
         dst = np.zeros((dH, dW, 3))
 
-        h = 1 / ratio
+        h_x, h_y = 1 * x_ratio, 1 * y_ratio
 
         for c in range(C):
             for j in range(dH):
                 for i in range(dW):
                     # Getting the coordinates of the
                     # nearby values
-                    x, y = i * h + 2, j * h + 2
+                    x, y = i * h_x + 2, j * h_y + 2
 
                     x1 = 1 + x - math.floor(x)
                     x2 = x - math.floor(x)
@@ -179,19 +183,24 @@ class ImgFormatTransformer:
 
     @staticmethod
     def lanczos():
-        ratio = simpledialog.askfloat(title="Type a factor value", prompt="Try not to use big values",
-                                      parent=UISingleton.ui_main)
+        height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
+                                           parent=UISingleton.ui_main))
+        width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
+                                          parent=UISingleton.ui_main))
         img = ImageObjectSingleton.img_array
         H, W, C = img.shape
 
+        x_ratio = float(W - 1) / (width - 1) if width > 1 else 0
+        y_ratio = float(H - 1) / (height - 1) if height > 1 else 0
+
         img = padding(img, H, W, C)
 
-        dH = math.floor(H * ratio)
-        dW = math.floor(W * ratio)
+        dH = height
+        dW = width
 
         dst = np.zeros((dH, dW, 3))
 
-        h = 1 / ratio
+        h_x, h_y = 1 * x_ratio, 1 * y_ratio
 
         for c in range(C):
             print(c)
@@ -199,7 +208,7 @@ class ImgFormatTransformer:
                 for i in range(dW):
                     # Getting the coordinates of the
                     # nearby values
-                    x, y = i * h + 2, j * h + 2
+                    x, y = i * h_x + 2, j * h_y + 2
 
                     x1 = 1 + x - math.floor(x)
                     x2 = x - math.floor(x)

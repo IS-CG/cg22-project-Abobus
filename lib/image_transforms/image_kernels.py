@@ -21,7 +21,6 @@ def padding(img, H, W, C):
 
 
 def bicubic_kernel(x, B=1 / 3., C=1 / 3.):
-    """https://de.wikipedia.org/wiki/Mitchell-Netravali-Filter"""
     if abs(x) < 1:
         return 1 / 6. * ((12 - 9 * B - 6 * C) * abs(x) ** 3 + ((-18 + 12 * B + 6 * C) * abs(x) ** 2 + (6 - 2 * B)))
     elif 1 <= abs(x) < 2:

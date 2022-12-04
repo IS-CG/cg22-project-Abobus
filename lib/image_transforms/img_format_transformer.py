@@ -3,21 +3,10 @@ from tkinter import simpledialog
 from numba import njit
 import numpy as np
 
-from lib.image_transforms.image_kernels import bicubic_kernel, lanczos_filter
+from lib.image_transforms.image_kernels import padding, bicubic_kernel, lanczos_filter
 from lib.singleton_objects import ImageObjectSingleton, UISingleton
 from lib.image_managers import ImageViewer
 import math
-
-
-
-
-@njit
-def padding(image: np.ndarray, padding_size: int) -> np.ndarray: # todo перенеси вместо своего паддинга, я не хочу все твои алгосы рефакторить :3
-    height, width = image.shape[:2]
-    new_image = np.zeros((height + padding_size * 2, width + padding_size * 2, 3), dtype=np.uint8)
-    new_image[padding_size:height + padding_size, padding_size:width + padding_size] = image
-    return new_image
-
 
 
 class ImgFormatTransformer:
@@ -60,62 +49,67 @@ class ImgFormatTransformer:
     def resize_neighbour():
         img = ImageObjectSingleton.img
         img_array = ImageObjectSingleton.img_array
-        factor = simpledialog.askfloat(title="Type a factor value", prompt="Try not to use big values",
-                                       parent=UISingleton.ui_main)
+        height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
+                                       parent=UISingleton.ui_main))
+        width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
+                                       parent=UISingleton.ui_main))
+        original_width, original_height, channel = img_array.shape
 
-        W, H = img.size
-        newW = int(W * factor)
-        newH = int(H * factor)
-        newImage_array = np.array(Image.new('RGB', (newW, newH)))
-        r, g, b = newImage_array[:, :, 0].astype(float), newImage_array[:, :, 1].astype(float), newImage_array[:, :,
-                                                                                                2].astype(float)
-        for col in range(newH):
-            for row in range(newW):
-                coord = row / factor, col / factor
-                p = img.getpixel(coord)
-                r[col][row], g[col][row], b[col][row] = p[0], p[1], p[2]
+        red_channel = img_array[:, :, 0]
+        green_channel = img_array[:, :, 1]
+        blue_channel = img_array[:, :, 2]
 
-        img_array = (np.dstack((r, g, b))).astype(np.uint8)
+        resized_image = np.zeros((width, height, channel), dtype=np.uint8)
 
-        ImageObjectSingleton.img_array = img_array
-        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+        x_scale = original_width / width
+        y_scale = original_height / height
 
-    @classmethod
-    def bilinear_resize(cls):
+        resize_index_x = np.ceil(np.arange(0, original_width, x_scale)).astype(int)
+        resize_index_y = np.ceil(np.arange(0, original_height, y_scale)).astype(int)
+        resize_index_x[np.where(resize_index_x == original_width)] -= 1
+        resize_index_y[np.where(resize_index_y == original_height)] -= 1
 
-        img = ImageObjectSingleton.img_array
-
-        new_width = int(simpledialog.askstring("Input", "Enter new width:"))
-        new_height = int(simpledialog.askstring("Input", "Enter new height:"))
-
-        new_center_x = int(simpledialog.askstring("Input", "Enter center cordinate:"))
-        new_center_y = int(simpledialog.askstring("Input", "Enter new center coordinate:"))
-
-        new_img = cls._bilinear_resize(img, new_height, new_width).astype(np.uint8)
-
-        ImageObjectSingleton.img_array = new_img.astype(np.uint8)
+        resized_image[:, :, 0] = red_channel[resize_index_x, :][:, resize_index_y]
+        resized_image[:, :, 1] = green_channel[resize_index_x, :][:, resize_index_y]
+        resized_image[:, :, 2] = blue_channel[resize_index_x, :][:, resize_index_y]
+        ImageObjectSingleton.img_array = resized_image
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @staticmethod
-    @njit
-    def _bilinear_resize(image: np.ndarray, new_width: int, new_height: int) -> np.ndarray:
-        height, width = image.shape[:2]
-        image = padding(image, 1)
-        new_image = np.zeros((new_height, new_width, 3), dtype=np.uint8)
-        for i in range(new_height):
-            for j in range(new_width):
-                x = j * width / new_width
-                y = i * height / new_height
-                x1 = math.floor(x)
-                y1 = math.floor(y)
-                x2 = math.ceil(x)
-                y2 = math.ceil(y)
-                x_diff = x - x1
-                y_diff = y - y1
-                new_image[i, j] = (1 - x_diff) * (1 - y_diff) * image[y1, x1] + x_diff * (1 - y_diff) * image[y1, x2] + (
-                        1 - x_diff) * y_diff * image[y2, x1] + x_diff * y_diff * image[y2, x2]
-        return new_image
-            
+    def bilinear_resize():
+        image = ImageObjectSingleton.img_array
+        img_height, img_width = image.shape[:2]
+        height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
+                                       parent=UISingleton.ui_main))
+        width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
+                                       parent=UISingleton.ui_main))
+        resized = np.array(Image.new('RGB', (width, height)))
+
+        x_ratio = float(img_width - 1) / (width - 1) if width > 1 else 0
+        y_ratio = float(img_height - 1) / (height - 1) if height > 1 else 0
+
+        for i in range(height):
+            for j in range(width):
+                x_l, y_l = math.floor(x_ratio * j), math.floor(y_ratio * i)
+                x_h, y_h = math.ceil(x_ratio * j), math.ceil(y_ratio * i)
+
+                x_weight = (x_ratio * j) - x_l
+                y_weight = (y_ratio * i) - y_l
+
+                a = image[y_l, x_l]
+                b = image[y_l, x_h]
+                c = image[y_h, x_l]
+                d = image[y_h, x_h]
+
+                pixel = a * (1 - x_weight) * (1 - y_weight) \
+                        + b * x_weight * (1 - y_weight) + \
+                        c * y_weight * (1 - x_weight) + \
+                        d * x_weight * y_weight
+
+                resized[i][j] = pixel
+
+        ImageObjectSingleton.img_array = resized
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @staticmethod
     def mitchell():
@@ -182,8 +176,6 @@ class ImgFormatTransformer:
 
         ImageObjectSingleton.img_array = dst.astype(np.uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
-    
-
 
     @staticmethod
     def lanczos():

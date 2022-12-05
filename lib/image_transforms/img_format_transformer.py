@@ -188,46 +188,50 @@ class ImgFormatTransformer:
 
         h_x, h_y = 1 * x_ratio, 1 * y_ratio
 
-        for c in range(channels):
-            for j in range(height):
-                for i in range(width):
-                    # Getting the coordinates of the
-                    # nearby values
-                    x, y = i * h_x + 2, j * h_y + 2
+        @njit
+        def calculate_convolutions(resized_img: np.ndarray, img: np.ndarray):
+            for c in range(channels):
+                for j in range(height):
+                    for i in range(width):
+                        # Getting the coordinates of the
+                        # nearby values
+                        x, y = i * h_x + 2, j * h_y + 2
 
-                    x1 = 1 + x - math.floor(x)
-                    x2 = x - math.floor(x)
-                    x3 = math.floor(x) + 1 - x
-                    x4 = math.floor(x) + 2 - x
+                        x1 = 1 + x - math.floor(x)
+                        x2 = x - math.floor(x)
+                        x3 = math.floor(x) + 1 - x
+                        x4 = math.floor(x) + 2 - x
 
-                    y1 = 1 + y - math.floor(y)
-                    y2 = y - math.floor(y)
-                    y3 = math.floor(y) + 1 - y
-                    y4 = math.floor(y) + 2 - y
+                        y1 = 1 + y - math.floor(y)
+                        y2 = y - math.floor(y)
+                        y3 = math.floor(y) + 1 - y
+                        y4 = math.floor(y) + 2 - y
 
-                    # Considering all nearby 16 values
-                    mat_l = np.matrix(
-                        [[lanczos_filter(x1), lanczos_filter(x2), lanczos_filter(x3), lanczos_filter(x4)]])
-                    mat_m = np.matrix([[img[int(y - y1), int(x - x1), c],
-                                        img[int(y - y2), int(x - x1), c],
-                                        img[int(y + y3), int(x - x1), c],
-                                        img[int(y + y4), int(x - x1), c]],
-                                       [img[int(y - y1), int(x - x2), c],
-                                        img[int(y - y2), int(x - x2), c],
-                                        img[int(y + y3), int(x - x2), c],
-                                        img[int(y + y4), int(x - x2), c]],
-                                       [img[int(y - y1), int(x + x3), c],
-                                        img[int(y - y2), int(x + x3), c],
-                                        img[int(y + y3), int(x + x3), c],
-                                        img[int(y + y4), int(x + x3), c]],
-                                       [img[int(y - y1), int(x + x4), c],
-                                        img[int(y - y2), int(x + x4), c],
-                                        img[int(y + y3), int(x + x4), c],
-                                        img[int(y + y4), int(x + x4), c]]])
-                    mat_r = np.matrix(
-                        [[lanczos_filter(y1)], [lanczos_filter(y2)], [lanczos_filter(y3)], [lanczos_filter(y4)]])
+                        # Considering all nearby 16 values
+                        mat_l = np.matrix(
+                            [[lanczos_filter(x1), lanczos_filter(x2), lanczos_filter(x3), lanczos_filter(x4)]])
+                        mat_m = np.matrix([[img[int(y - y1), int(x - x1), c],
+                                            img[int(y - y2), int(x - x1), c],
+                                            img[int(y + y3), int(x - x1), c],
+                                            img[int(y + y4), int(x - x1), c]],
+                                           [img[int(y - y1), int(x - x2), c],
+                                            img[int(y - y2), int(x - x2), c],
+                                            img[int(y + y3), int(x - x2), c],
+                                            img[int(y + y4), int(x - x2), c]],
+                                           [img[int(y - y1), int(x + x3), c],
+                                            img[int(y - y2), int(x + x3), c],
+                                            img[int(y + y3), int(x + x3), c],
+                                            img[int(y + y4), int(x + x3), c]],
+                                           [img[int(y - y1), int(x + x4), c],
+                                            img[int(y - y2), int(x + x4), c],
+                                            img[int(y + y3), int(x + x4), c],
+                                            img[int(y + y4), int(x + x4), c]]])
+                        mat_r = np.matrix(
+                            [[lanczos_filter(y1)], [lanczos_filter(y2)], [lanczos_filter(y3)], [lanczos_filter(y4)]])
 
-                    resized_img[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)
+                        resized_img[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)
+            return resized_img
 
+        resized_img = calculate_convolutions(resized_img, img)
         ImageObjectSingleton.img_array = resized_img.astype(np.uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)

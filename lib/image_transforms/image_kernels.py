@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit
 
 
 def padding(img, H, W, C):
@@ -19,7 +20,7 @@ def padding(img, H, W, C):
 
     return padded_image
 
-
+@njit
 def bicubic_kernel(x, b=1/3., c=1/3.):
     if abs(x) < 1:
         return 1 / 6. * ((12 - 9 * b - 6 * c) * abs(x) ** 3 + ((-18 + 12 * b + 6 * c) * abs(x) ** 2 + (6 - 2 * b)))
@@ -30,14 +31,14 @@ def bicubic_kernel(x, b=1/3., c=1/3.):
     else:
         return 0
 
-
+@njit
 def sinc_filter(x):
     if x == 0:
         return 1
     x *= np.pi
     return np.sin(x) / x
 
-
+@njit
 def lanczos_filter(x):
     if -3.0 <= x < 3.0:
         return sinc_filter(x) * sinc_filter(x / 3)

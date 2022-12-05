@@ -5,8 +5,9 @@ import tkinter as tk
 from tkinter import Menu
 
 from lib.image_managers import ImageReader, ImageViewer
+from lib.image_transforms.image_kernels import bicubic_kernel
 from lib.singleton_objects import UISingleton
-from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer,DitheringTransformer
+from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer, DitheringTransformer
 
 from lib.painters import LinePainter, GradientPainter
 
@@ -48,7 +49,8 @@ class UIBuilder:
         file_menu = Menu(UISingleton.ui_main, tearoff=0)
         file_menu.add_command(label="Open", command=ImageReader.read_img)
         file_menu.add_command(label="Save", command=ImageReader.save_img)
-        file_menu.add_command(label='Stash Changes', command=ImgFormatTransformer.stash_changes)
+        file_menu.add_command(label='Stash Changes', command=ImageViewer.stash_changes)
+        file_menu.add_command(label='Move img', command=ImageViewer.move_img_menu)
 
         UISingleton.main_menu.add_cascade(label="File",
                                           menu=file_menu)
@@ -58,6 +60,12 @@ class UIBuilder:
         transform_menu = Menu(UISingleton.ui_main, tearoff=0)
         transform_menu.add_command(label="Rotate", command=ImgFormatTransformer.rotate)
         transform_menu.add_command(label="Flip", command=ImgFormatTransformer.flip)
+        resize_menu = Menu(UISingleton.ui_main, tearoff=0)
+        resize_menu.add_command(label="Resize_neighbour", command=ImgFormatTransformer.resize_neighbour)
+        resize_menu.add_command(label="Resize bilinear", command=ImgFormatTransformer.bilinear_resize)
+        resize_menu.add_command(label="Resize mitchell", command=ImgFormatTransformer.mitchell)
+        resize_menu.add_command(label="Resize lanczos", command=ImgFormatTransformer.lanczos)
+        transform_menu.add_cascade(label="Resize image", menu=resize_menu)
 
         gamma_menu = Menu(UISingleton.ui_main, tearoff=0)
         gamma_menu.add_command(label='view_new_gamma', command=GammaTransformer.view_new_gamma)

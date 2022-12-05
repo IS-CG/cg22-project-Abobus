@@ -2,31 +2,31 @@ import numpy as np
 
 
 def padding(img, H, W, C):
-    zimg = np.zeros((H + 4, W + 4, C))
-    zimg[2:H + 2, 2:W + 2, :C] = img
+    padded_image = np.zeros((H + 4, W + 4, C))
+    padded_image[2:H + 2, 2:W + 2, :C] = img
 
     # Pad the first/last two col and row
-    zimg[2:H + 2, 0:2, :C] = img[:, 0:1, :C]
-    zimg[H + 2:H + 4, 2:W + 2, :] = img[H - 1:H, :, :]
-    zimg[2:H + 2, W + 2:W + 4, :] = img[:, W - 1:W, :]
-    zimg[0:2, 2:W + 2, :C] = img[0:1, :, :C]
+    padded_image[2:H + 2, 0:2, :C] = img[:, 0:1, :C]
+    padded_image[H + 2:H + 4, 2:W + 2, :] = img[H - 1:H, :, :]
+    padded_image[2:H + 2, W + 2:W + 4, :] = img[:, W - 1:W, :]
+    padded_image[0:2, 2:W + 2, :C] = img[0:1, :, :C]
 
     # Pad the missing eight points
-    zimg[0:2, 0:2, :C] = img[0, 0, :C]
-    zimg[H + 2:H + 4, 0:2, :C] = img[H - 1, 0, :C]
-    zimg[H + 2:H + 4, W + 2:W + 4, :C] = img[H - 1, W - 1, :C]
-    zimg[0:2, W + 2:W + 4, :C] = img[0, W - 1, :C]
+    padded_image[0:2, 0:2, :C] = img[0, 0, :C]
+    padded_image[H + 2:H + 4, 0:2, :C] = img[H - 1, 0, :C]
+    padded_image[H + 2:H + 4, W + 2:W + 4, :C] = img[H - 1, W - 1, :C]
+    padded_image[0:2, W + 2:W + 4, :C] = img[0, W - 1, :C]
 
-    return zimg
+    return padded_image
 
 
-def bicubic_kernel(x, B=1 / 3., C=1 / 3.):
+def bicubic_kernel(x, b=1/3., c=1/3.):
     if abs(x) < 1:
-        return 1 / 6. * ((12 - 9 * B - 6 * C) * abs(x) ** 3 + ((-18 + 12 * B + 6 * C) * abs(x) ** 2 + (6 - 2 * B)))
+        return 1 / 6. * ((12 - 9 * b - 6 * c) * abs(x) ** 3 + ((-18 + 12 * b + 6 * c) * abs(x) ** 2 + (6 - 2 * b)))
     elif 1 <= abs(x) < 2:
         return 1 / 6. * (
-                (-B - 6 * C) * abs(x) ** 3 + (6 * B + 30 * C) * abs(x) ** 2 + (-12 * B - 48 * C) * abs(x) + (
-                8 * B + 24 * C))
+                (-b - 6 * c) * abs(x) ** 3 + (6 * b + 30 * c) * abs(x) ** 2 + (-12 * b - 48 * c) * abs(x) + (
+                8 * b + 24 * c))
     else:
         return 0
 

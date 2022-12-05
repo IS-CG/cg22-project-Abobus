@@ -40,10 +40,6 @@ class ImgFormatTransformer:
         ImageObjectSingleton.img = ImageObjectSingleton.img.transpose(Image.FLIP_LEFT_RIGHT)
         ImageViewer.display_img()
 
-    @staticmethod
-    def get_pixel(source, col, row):
-        r, g, b = source[:, :, 0].astype(float), source[:, :, 1].astype(float), source[:, :, 2].astype(float)
-        return r[col][row], g[col][row], b[col][row]
 
     @staticmethod
     def resize_neighbour():
@@ -52,25 +48,23 @@ class ImgFormatTransformer:
                                        parent=UISingleton.ui_main))
         width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
                                        parent=UISingleton.ui_main))
-        original_width, original_height, channel = img_array.shape
+        img_width, img_height, channel = img_array.shape
 
-        red_channel = img_array[:, :, 0]
-        green_channel = img_array[:, :, 1]
-        blue_channel = img_array[:, :, 2]
+        r, g, b = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
 
         resized_image = np.zeros((width, height, channel), dtype=np.uint8)
 
-        x_scale = original_width / width
-        y_scale = original_height / height
+        x_ratio = img_width / width
+        y_ratio = img_height / height
 
-        resize_index_x = np.ceil(np.arange(0, original_width, x_scale)).astype(int)
-        resize_index_y = np.ceil(np.arange(0, original_height, y_scale)).astype(int)
-        resize_index_x[np.where(resize_index_x == original_width)] -= 1
-        resize_index_y[np.where(resize_index_y == original_height)] -= 1
+        resize_index_x = np.ceil(np.arange(0, img_width, x_ratio)).astype(int)
+        resize_index_y = np.ceil(np.arange(0, img_height, y_ratio)).astype(int)
+        resize_index_x[np.where(resize_index_x == img_width)] -= 1
+        resize_index_y[np.where(resize_index_y == img_height)] -= 1
 
-        resized_image[:, :, 0] = red_channel[resize_index_x, :][:, resize_index_y]
-        resized_image[:, :, 1] = green_channel[resize_index_x, :][:, resize_index_y]
-        resized_image[:, :, 2] = blue_channel[resize_index_x, :][:, resize_index_y]
+        resized_image[:, :, 0] = r[resize_index_x, :][:, resize_index_y]
+        resized_image[:, :, 1] = g[resize_index_x, :][:, resize_index_y]
+        resized_image[:, :, 2] = b[resize_index_x, :][:, resize_index_y]
         ImageObjectSingleton.img_array = resized_image
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
@@ -102,7 +96,7 @@ class ImgFormatTransformer:
 
                 pixel = a * (1 - x_weight) * (1 - y_weight) \
                         + b * x_weight * (1 - y_weight) + \
-                        c * y_weight * (1 - x_weight) + \
+                        c * (1 - x_weight) * y_weight + \
                         d * x_weight * y_weight
 
                 resized[i][j] = pixel
@@ -119,23 +113,20 @@ class ImgFormatTransformer:
         B_m = simpledialog.askfloat(title="Type a B_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
         C_m = simpledialog.askfloat(title="Type a C_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
         img = ImageObjectSingleton.img_array
-        H, W, C = img.shape
+        height_image, width_image, channels = img.shape
 
-        x_ratio = float(W - 1) / (width - 1) if width > 1 else 0
-        y_ratio = float(H - 1) / (height - 1) if height > 1 else 0
+        x_ratio = float(width_image - 1) / (width - 1) if width > 1 else 0
+        y_ratio = float(height_image - 1) / (height - 1) if height > 1 else 0
 
-        img = padding(img, H, W, C)
+        img = padding(img, height_image, width_image, channels)
 
-        dH = height
-        dW = width
-
-        dst = np.zeros((dH, dW, 3))
+        resized_img = np.zeros((height, width, 3))
 
         h_x, h_y = 1 * x_ratio, 1 * y_ratio
 
-        for c in range(C):
-            for j in range(dH):
-                for i in range(dW):
+        for c in range(channels):
+            for j in range(height):
+                for i in range(width):
                     # Getting the coordinates of the
                     # nearby values
                     x, y = i * h_x + 2, j * h_y + 2
@@ -174,11 +165,9 @@ class ImgFormatTransformer:
                         [[bicubic_kernel(y1, B_m, C_m)], [bicubic_kernel(y2, B_m, C_m)], [bicubic_kernel(y3, B_m, C_m)],
                          [bicubic_kernel(y4, B_m, C_m)]])
 
-                    # Here the dot function is used to get the dot
-                    # product of 2 matrices
-                    dst[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)
+                    resized_img[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)
 
-        ImageObjectSingleton.img_array = dst.astype(np.uint8)
+        ImageObjectSingleton.img_array = resized_img.astype(np.uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @staticmethod
@@ -188,24 +177,20 @@ class ImgFormatTransformer:
         width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
                                           parent=UISingleton.ui_main))
         img = ImageObjectSingleton.img_array
-        H, W, C = img.shape
+        height_img, width_img, channels = img.shape
 
-        x_ratio = float(W - 1) / (width - 1) if width > 1 else 0
-        y_ratio = float(H - 1) / (height - 1) if height > 1 else 0
+        x_ratio = float(width_img - 1) / (width - 1) if width > 1 else 0
+        y_ratio = float(height_img - 1) / (height - 1) if height > 1 else 0
 
-        img = padding(img, H, W, C)
+        img = padding(img, height_img, width_img, channels)
 
-        dH = height
-        dW = width
-
-        dst = np.zeros((dH, dW, 3))
+        resized_img = np.zeros((height, width, 3))
 
         h_x, h_y = 1 * x_ratio, 1 * y_ratio
 
-        for c in range(C):
-            print(c)
-            for j in range(dH):
-                for i in range(dW):
+        for c in range(channels):
+            for j in range(height):
+                for i in range(width):
                     # Getting the coordinates of the
                     # nearby values
                     x, y = i * h_x + 2, j * h_y + 2
@@ -242,9 +227,7 @@ class ImgFormatTransformer:
                     mat_r = np.matrix(
                         [[lanczos_filter(y1)], [lanczos_filter(y2)], [lanczos_filter(y3)], [lanczos_filter(y4)]])
 
-                    # Here the dot function is used to get the dot
-                    # product of 2 matrices
-                    dst[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)
+                    resized_img[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)
 
-        ImageObjectSingleton.img_array = dst.astype(np.uint8)
+        ImageObjectSingleton.img_array = resized_img.astype(np.uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)

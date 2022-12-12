@@ -18,6 +18,16 @@ from lib.singleton_objects import ImageObjectSingleton
 from lib.image_managers.image_viewer import ImageViewer
 
 
+def write_pnm(img_name):
+    img = ImageObjectSingleton.img_array
+    maxval = np.amax(img)
+    height, width = img.shape[0:2]
+    ppm_header = f'P6 {width} {height} {maxval}\n'
+    with open(img_name, 'wb') as f:
+        f.write(bytearray(ppm_header, 'ascii'))
+        img.tofile(f)
+
+
 def change_gamma_cv2(img, gamma):
     invGamma = 1.0 / gamma
     table = np.array([((i / 255.0) ** invGamma) * 255
@@ -259,10 +269,10 @@ class ImageReader:
         ImageViewer.display_img_array(pixels)
 
     @staticmethod
-    def save_img():
+    def save_pnm():
         img_name = filedialog.asksaveasfilename(title="save", defaultextension=".pnm")
-        if img_name:
-            ImageObjectSingleton.img.save(img_name)
+        write_pnm(img_name=img_name)
+
 
     @staticmethod
     def save_png():

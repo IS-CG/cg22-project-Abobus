@@ -133,6 +133,29 @@ def boxBlur(image):
     return blur_img
 
 
+def binary_threshold(img, threshold):
+    """
+    Perform binary thresholding.
+    :img: the original grayscale image.
+    :threshold: the threshold value.
+    """
+
+    # Flatten the image.
+    flat = np.ndarray.flatten(img)
+
+    # Perform the threshold.
+    for i in range(flat.shape[0]):
+
+        if (flat[i] * 255) > threshold:
+            flat[i] = 255
+        else:
+            flat[i] = 0
+
+    # Reshape the image.
+    thresh_img = np.reshape(flat, (img.shape[0], img.shape[1]))
+
+    return thresh_img
+
 class ImgFilterTransformer:
     @staticmethod
     def gauss_filter():
@@ -210,6 +233,14 @@ class ImgFilterTransformer:
         final_img = gray.copy()
         final_img[gray > final_thresh] = 255
         final_img[gray < final_thresh] = 0
+        ImageObjectSingleton.img_array = final_img
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+
+    @staticmethod
+    def binary_treshold():
+        img = ImageObjectSingleton.img_array
+        gray = cvtColor(img, COLOR_BGR2GRAY)
+        final_img = binary_threshold(gray, 185)
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 

@@ -69,6 +69,8 @@ class UIBuilder:
         transform_menu.add_cascade(label="Resize image", menu=resize_menu)
         filter_menu = Menu(UISingleton.ui_main, tearoff=0)
         filter_menu.add_command(label="Gauss filter", command=ImgFilterTransformer.gauss_filter)
+        filter_menu.add_command(label="Median filter", command=ImgFilterTransformer.median_filter)
+        filter_menu.add_command(label="Sobel filter", command=ImgFilterTransformer.sobel_filter)
         transform_menu.add_cascade(label="Filtering", menu=filter_menu)
 
         gamma_menu = Menu(UISingleton.ui_main, tearoff=0)

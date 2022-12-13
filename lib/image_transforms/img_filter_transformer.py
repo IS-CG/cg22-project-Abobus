@@ -239,8 +239,10 @@ class ImgFilterTransformer:
     @staticmethod
     def binary_treshold():
         img = ImageObjectSingleton.img_array
+        pixel_value = int(simpledialog.askfloat(title="Type a pixel value", prompt="0-255",
+                                          parent=UISingleton.ui_main))
         gray = cvtColor(img, COLOR_BGR2GRAY)
-        final_img = binary_threshold(gray, 185)
+        final_img = binary_threshold(gray, pixel_value)
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 

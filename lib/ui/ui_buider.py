@@ -47,10 +47,16 @@ class UIBuilder:
     @staticmethod
     def add_file_menu():
         file_menu = Menu(UISingleton.ui_main, tearoff=0)
-        file_menu.add_command(label="Open", command=ImageReader.read_img)
-        file_menu.add_command(label="Save", command=ImageReader.save_img)
+        open_menu = Menu(UISingleton.ui_main, tearoff=0)
+        save_menu = Menu(UISingleton.ui_main, tearoff=0)
+        open_menu.add_command(label="Open .pnm", command=ImageReader.read_img_pnm)
+        open_menu.add_command(label="Open .png", command=ImageReader.read_img_png)
+        save_menu.add_command(label="Save .pnm", command=ImageReader.save_pnm)
+        save_menu.add_command(label="Save .png", command=ImageReader.save_png)
         file_menu.add_command(label='Stash Changes', command=ImageViewer.stash_changes)
         file_menu.add_command(label='Move img', command=ImageViewer.move_img_menu)
+        file_menu.add_cascade(label="Open", menu=open_menu)
+        file_menu.add_cascade(label="Save", menu=save_menu)
 
         UISingleton.main_menu.add_cascade(label="File",
                                           menu=file_menu)

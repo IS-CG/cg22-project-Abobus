@@ -74,142 +74,63 @@ def square_matrix(square):
     return tot_sum // 9  # return the average of the sum of pixels
 
 
-# def boxBlur(image):
-#     """
-#     This function will calculate the blurred
-#     image for given n * n image.
-#     """
-#     square = []  # This will store the 3 * 3 matrix
-#     # which will be used to find its blurred pixel
-#
-#     square_row = []  # This will store one row of a 3 * 3 matrix and
-#     # will be appended in square
-#
-#     blur_row = []  # Here we will store the resulting blurred
-#     # pixels possible in one row
-#     # and will append this in the blur_img
-#
-#     blur_img = []  # This is the resulting blurred image
-#
-#     # number of rows in the given image
-#     n_rows = len(image)
-#
-#     # number of columns in the given image
-#     n_col = len(image[0])
-#
-#     # rp is row pointer and cp is column pointer
-#     rp, cp = 0, 0
-#
-#     # This while loop will be used to
-#     # calculate all the blurred pixel in the first row
-#     while rp <= n_rows - 3:
-#         while cp <= n_col - 3:
-#
-#             for i in range(rp, rp + 3):
-#
-#                 for j in range(cp, cp + 3):
-#                     # append all the pixels in a row of 3 * 3 matrix
-#                     square_row.append(image[i][j])
-#
-#                 # append the row in the square i.e. 3 * 3 matrix
-#                 square.append(square_row)
-#                 square_row = []
-#
-#             # calculate the blurred pixel for given 3 * 3 matrix
-#             # i.e. square and append it in blur_row
-#             blur_row.append(square_matrix(square))
-#             square = []
-#
-#             # increase the column pointer
-#             cp = cp + 1
-#
-#         # append the blur_row in blur_image
-#         blur_img.append(blur_row)
-#         blur_row = []
-#         rp = rp + 1  # increase row pointer
-#         cp = 0  # start column pointer from 0 again
-#
-#     # Return the resulting pixel matrix
-#     return blur_img
-
-def integralImage(img):
+def boxBlur(image):
     """
-    Returns the integral image/summed area table. See here: https://en.wikipedia.org/wiki/Summed_area_table
-    :param img:
-    :return:
+    This function will calculate the blurred
+    image for given n * n image.
     """
-    height = img.shape[0]
-    width = img.shape[1]
-    int_image = np.zeros((height, width), np.uint64)
-    for y in range(height):
-        for x in range(width):
-            up = 0 if (y - 1 < 0) else int_image.item((y - 1, x))
-            left = 0 if (x - 1 < 0) else int_image.item((y, x - 1))
-            diagonal = 0 if (x - 1 < 0 or y - 1 < 0) else int_image.item((y - 1, x - 1))
-            val = img.item((y, x)) + int(up) + int(left) - int(diagonal)
-            int_image.itemset((y, x), val)
-    return int_image
+    square = []  # This will store the 3 * 3 matrix
+    # which will be used to find its blurred pixel
 
+    square_row = []  # This will store one row of a 3 * 3 matrix and
+    # will be appended in square
 
-def adjustEdges(height, width, point):
-    """
-    This handles the edge cases if the box's bounds are outside the image range based on current pixel.
-    :param height: Height of the image.
-    :param width: Width of the image.
-    :param point: The current point.
-    :return:
-    """
-    newPoint = [point[0], point[1]]
-    if point[0] >= height:
-        newPoint[0] = height - 1
+    blur_row = []  # Here we will store the resulting blurred
+    # pixels possible in one row
+    # and will append this in the blur_img
 
-    if point[1] >= width:
-        newPoint[1] = width - 1
-    return tuple(newPoint)
+    blur_img = []  # This is the resulting blurred image
 
+    # number of rows in the given image
+    n_rows = len(image)
 
-def findArea(int_img, a, b, c, d):
-    """
-    Finds the area for a particular square using the integral image. See summed area wiki.
-    :param int_img: The
-    :param a: Top left corner.
-    :param b: Top right corner.
-    :param c: Bottom left corner.
-    :param d: Bottom right corner.
-    :return: The integral image.
-    """
-    height = int_img.shape[0]
-    width = int_img.shape[1]
-    a = adjustEdges(height, width, a)
-    b = adjustEdges(height, width, b)
-    c = adjustEdges(height, width, c)
-    d = adjustEdges(height, width, d)
+    # number of columns in the given image
+    n_col = len(image[0])
 
-    a = 0 if (a[0] < 0 or a[0] >= height) or (a[1] < 0 or a[1] >= width) else int_img.item(a[0], a[1])
-    b = 0 if (b[0] < 0 or b[0] >= height) or (b[1] < 0 or b[1] >= width) else int_img.item(b[0], b[1])
-    c = 0 if (c[0] < 0 or c[0] >= height) or (c[1] < 0 or c[1] >= width) else int_img.item(c[0], c[1])
-    d = 0 if (d[0] < 0 or d[0] >= height) or (d[1] < 0 or d[1] >= width) else int_img.item(d[0], d[1])
+    # rp is row pointer and cp is column pointer
+    rp, cp = 0, 0
 
-    return a + d - b - c
+    # This while loop will be used to
+    # calculate all the blurred pixel in the first row
+    while rp <= n_rows - 3:
+        while cp <= n_col - 3:
 
+            for i in range(rp, rp + 3):
 
-def box_filter(img, filterSize):
-    """
-    Runs the subsequent box filtering steps. Prints original image, finds integral image, and then outputs final image
-    :param img: An image in matrix form.
-    :param filterSize: The filter size of the matrix
-    :return: A final image written as finalimage.png
-    """
-    height = img.shape[0]
-    width = img.shape[1]
-    intImg = integralImage(img)
-    finalImg = np.ones((height, width), np.uint64)
-    loc = filterSize / 2
-    for y in range(height):
-        for x in range(width):
-            finalImg.itemset((y, x), findArea(intImg, (y - loc - 1, x - loc - 1), (y - loc - 1, x + loc),
-                                              (y + loc, x - loc - 1), (y + loc, x + loc)) / (filterSize ** 2))
-    return finalImg
+                for j in range(cp, cp + 3):
+                    # append all the pixels in a row of 3 * 3 matrix
+                    square_row.append(image[i][j])
+
+                # append the row in the square i.e. 3 * 3 matrix
+                square.append(square_row)
+                square_row = []
+
+            # calculate the blurred pixel for given 3 * 3 matrix
+            # i.e. square and append it in blur_row
+            blur_row.append(square_matrix(square))
+            square = []
+
+            # increase the column pointer
+            cp = cp + 1
+
+        # append the blur_row in blur_image
+        blur_img.append(blur_row)
+        blur_row = []
+        rp = rp + 1  # increase row pointer
+        cp = 0  # start column pointer from 0 again
+
+    # Return the resulting pixel matrix
+    return blur_img
 
 
 class ImgFilterTransformer:
@@ -260,6 +181,35 @@ class ImgFilterTransformer:
     @staticmethod
     def box_blur():
         img = ImageObjectSingleton.img_array
-        blurred = box_filter(img, 5)
+        blurred = boxBlur(img)
         ImageObjectSingleton.img_array = np.array(blurred).astype(uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+
+    @staticmethod
+    def otsu_filter():
+        img = ImageObjectSingleton.img_array
+        gray = cvtColor(img, COLOR_BGR2GRAY)
+        pixel_number = gray.shape[0] * gray.shape[1]
+        mean_weigth = 1.0 / pixel_number
+        his, bins = np.histogram(gray, np.array(range(0, 256)))
+        final_thresh = -1
+        final_value = -1
+        for t in bins[1:-1]:  # This goes from 1 to 254 uint8 range (Pretty sure wont be those values)
+            Wb = np.sum(his[:t]) * mean_weigth
+            Wf = np.sum(his[t:]) * mean_weigth
+
+            mub = np.mean(his[:t])
+            muf = np.mean(his[t:])
+
+            value = Wb * Wf * (mub - muf) ** 2
+
+
+            if value > final_value:
+                final_thresh = t
+                final_value = value
+        final_img = gray.copy()
+        final_img[gray > final_thresh] = 255
+        final_img[gray < final_thresh] = 0
+        ImageObjectSingleton.img_array = final_img
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+

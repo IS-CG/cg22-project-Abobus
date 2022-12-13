@@ -78,6 +78,7 @@ class UIBuilder:
         filter_menu.add_command(label="Median filter", command=ImgFilterTransformer.median_filter)
         filter_menu.add_command(label="Sobel filter", command=ImgFilterTransformer.sobel_filter)
         filter_menu.add_command(label="Box blur filter", command=ImgFilterTransformer.box_blur)
+        filter_menu.add_command(label="Otsu filter", command=ImgFilterTransformer.otsu_filter)
         transform_menu.add_cascade(label="Filtering", menu=filter_menu)
 
         gamma_menu = Menu(UISingleton.ui_main, tearoff=0)

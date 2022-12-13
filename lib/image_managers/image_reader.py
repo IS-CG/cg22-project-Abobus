@@ -212,6 +212,7 @@ class ImageReader:
                     break
             print([chunk_type for chunk_type, chunk_data in chunks])
             gama_data = b''.join(chunk_data for chunk_type, chunk_data in chunks if chunk_type == b'gAMA')
+            gama_value = None
             if gama_data:
                 gama_value = struct.unpack("!L", gama_data)[0] / 80
             _, IHDR_data = chunks[0]  # IHDR is always first chunk

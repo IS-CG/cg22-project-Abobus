@@ -7,49 +7,70 @@ import cv2
 from numba import njit
 import matplotlib.pyplot as plt
 
-from lib.singleton_objects import UISingleton, ImageSingleton
+from lib.singleton_objects import ImageSingleton
 from lib.image_managers import ImageViewer
 
 
 class ImageHistPlotter:
+    """ Class for plotting image histogram """
+    
     _ignore_range = 0
     _plot_bins = 90
 
     @classmethod
     def change_ignore_range(cls):
+        """ Changes ignore range for histogram """
         simpledialog.askfloat('Ignore range',
                               'Enter new ignore range part - a value [0..0.5]',
                               initialvalue=cls._ignore_range)
         
     @classmethod
-    def create_hist_plot(cls, color: str='black', channel: int=0) -> np.ndarray:
+    def create_hist_plot(cls, color: str='black', channel: int=0) -> None:
+        """ Creates histogram plot for image
+        Args:
+            color (str, optional): histogram color
+            channel (int, optional): channel to calculate histogram. Defaults to 0.
+        """        
         img_array = ImageSingleton.img_array.copy()
         
         if channel == -1:
             img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         
-        hist = cls.compute_hist_for_channel(gray)
+        hist = cls.compute_hist_for_channel(img_array)
         cumsum = hist.cumsum()
         hist_array = cls.get_hist_array(img_array, color=color,
                                         bins=cls._plot_bins, cumsum=cumsum)
         ImageViewer.preview_img(hist_array)
 
     @staticmethod
-    def get_hist_array(img_channel, color: str='black', bins: int=90, cumsum: np.ndarray=None):
+    def get_hist_array(img_channel: np.ndarray,
+                       color: str='black',
+                       bins: int=90,
+                       cumsum: np.ndarray=None) -> np.ndarray:
+        """ Returns histogram plot as np.ndarray
+
+        Args:
+            img_channel (np.ndarray): channel to calculate histogram. Defaults to 0.
+            color (str, optional): histogram color
+            bins (int, optional): bins for hist plotter. Defaults to 90.
+            cumsum (np.ndarray, optional): cumsum to plot. Defaults to None.
+        Returns:
+            np.ndarray : histogram plot as np.ndarray
+        """
         io_buf = io.BytesIO()
-        
+
         fig, ax = plt.subplots(1, 2)
-        
+
         ax[0].hist(img_channel.flatten(), bins,
                 density = False, 
                 histtype ='bar',
                 color = color,
         )
         ax[0].set_title('Histogram')
-        
+
         ax[1].plot(cumsum)
         ax[1].set_title('Cumulative Histogram')
-        
+
         plt.legend(prop ={'size': 10})
         plt.savefig(io_buf, format='raw')
         io_buf.seek(0)
@@ -61,7 +82,7 @@ class ImageHistPlotter:
     @classmethod
     def apply_contast_correction(cls):
         img_array = ImageSingleton.img_array.copy()
-        img_array = cls.auto_contrast_correction(img_array)
+        img_array = cls.auto_contrast_correction(img_array, cls._ignore_range)
         ImageSingleton.img_array = img_array
         ImageViewer.display_img_array(img_array)
 
@@ -116,4 +137,3 @@ class ImageHistPlotter:
                 hist[i] += 1
         
         return hist
-

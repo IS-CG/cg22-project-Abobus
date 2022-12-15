@@ -140,21 +140,9 @@ def binary_threshold(img, threshold):
     :threshold: the threshold value.
     """
 
-    # Flatten the image.
-    flat = np.ndarray.flatten(img)
-
-    # Perform the threshold.
-    for i in range(flat.shape[0]):
-
-        if (flat[i] * 255) > threshold:
-            flat[i] = 255
-        else:
-            flat[i] = 0
-
-    # Reshape the image.
-    thresh_img = np.reshape(flat, (img.shape[0], img.shape[1]))
-
-    return thresh_img
+    f_img = img.flatten()
+    binary_mask = (f_img * 255) > threshold
+    return np.where(binary_mask, 255, f_img).reshape((img.shape[0], img.shape[1]))
 
 class ImgFilterTransformer:
     @staticmethod

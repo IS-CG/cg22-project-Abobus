@@ -4,7 +4,7 @@ from tkinter import simpledialog
 import numpy as np
 from cv2 import COLOR_BGR2GRAY, cvtColor, imread, imshow, waitKey
 from numpy import dot, exp, mgrid, pi, ravel, square, uint8, zeros, zeros_like, sort, int8, divide, multiply, pad
-
+from numba import njit
 from lib.image_managers import ImageViewer
 from lib.singleton_objects import ImageObjectSingleton, UISingleton
 
@@ -231,7 +231,7 @@ class ImgFilterTransformer:
                 final_thresh = t
                 final_value = value
         final_img = gray.copy()
-        final_img[gray > final_thresh] = 255
+        final_img[gray > final_thresh] = 255    
         final_img[gray < final_thresh] = 0
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
@@ -245,44 +245,40 @@ class ImgFilterTransformer:
         final_img = binary_threshold(gray, pixel_value)
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
-        
-    @classmethod
-    def do_sharpening_filtering(cls):
-        weights = ImageObjectSingleton.img_array.copy()
-        coef = int(simpledialog.askfloat(title="Type a pixel value", prompt="0-255", 
-                                                parent=UISingleton.ui_main))
-        img_array = ImageObjectSingleton.img_array
-        H, W  = weights.shape[:2]
-        for i in range(1, H - 1):
-            for j in range(1, W - 1):
+    
+    @staticmethod
+    @njit
+    def sharpening_filtering(img_array: np.ndarray, coef: float) -> np.ndarray:
+        weights = img_array.copy()
+        height, width  = weights.shape[:2]
+        for i in range(1, height - 1):
+            for j in range(1, width - 1):
                 idxes = [(i, j), (i -1, j), (i + 1, j), (i, j -1), (i, j+ 1)]
                 min_g = min([weights[i, j, 1] for i, j in idxes]) / 255
                 max_g = max([weights[i, j, 1] for i, j in idxes]) / 255
-                d_ming_g = min_g
                 d_max_g = 1 - max_g
-                if (d_max_g > d_ming_g):
-                    if (min_g == 0):
-                        a = 0
-                    else:
-                        a = d_max_g / max_g
+                if (d_max_g > min_g):
+                    k_value = 0 if min_g == 0 else d_max_g / max_g
                 else:
-                    a = d_max_g / max_g
-
-                a = np.sqrt(a)
-                dev_max = cls.lerp(-0.125, -0.2, coef)
-                w = a * dev_max
+                    k_value = d_max_g / max_g
+                
+                dev_max = -0.125 + coef * (-0.2 - -0.125)
+                w = np.sqrt(k_value) * dev_max
                 for k in range(3):
-                    pix = sum([w * weights[i, j, k] for i, j in idxes]) / (w * 4 + 1)
-                    if pix < 0:
-                        pix = img_array[i, j, k]
-                    if pix > 255:
-                        pix = img_array[i, j, k]
-                    img_array[i, j, k] = pix
-        
+                    
+                    f_value = sum([w * weights[i, j, k] for i, j in idxes]) / (w * 4 + 1)
+                    
+                    if f_value > 255 or f_value < 0:
+                        f_value = img_array[i, j, k]
+                        
+                    img_array[i, j, k] = f_value
+        return img_array
+    
+    @classmethod
+    def do_sharpening_filtering(cls):
+        coef = int(simpledialog.askinteger(title="Type a pixel value", prompt="0-255", 
+                                           parent=UISingleton.ui_main))        
+        img_array = cls.sharpening_filtering(ImageObjectSingleton.img_array, coef)
         ImageObjectSingleton.img_array = img_array
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
-    
-    @staticmethod
-    def lerp(a, b, coef):
-        return a + coef * (b - a)

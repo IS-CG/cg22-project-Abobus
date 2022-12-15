@@ -5,11 +5,10 @@ import tkinter as tk
 from tkinter import Menu
 
 from lib.image_managers import ImageReader, ImageViewer
-from lib.image_transforms.image_kernels import bicubic_kernel
 from lib.singleton_objects import UISingleton
 from lib.image_transforms import GammaTransformer, ColorTransformer, ImgFormatTransformer, DitheringTransformer
 
-from lib.painters import LinePainter, GradientPainter
+from lib.painters import LinePainter, GradientPainter, ImageHistPlotter
 
 
 class UIBuilder:
@@ -105,6 +104,30 @@ class UIBuilder:
         paint_menu.add_command(label="draw_line", command=LinePainter.draw_line)
         paint_menu.add_cascade(label="change_line_params", menu=LinePainter.change_params())
         paint_menu.add_cascade(label='Draw Gradient', menu=GradientPainter.get_the_menu())
+        hist_menu = Menu(paint_menu, tearoff=0) 
+        hist_menu.add_command(label='R Channel Hist',
+                              command=partial(ImageHistPlotter.create_hist_plot,
+                                              color='red', channel=0))
+        
+        hist_menu.add_command(label='G Channel Hist',
+                              command=partial(ImageHistPlotter.create_hist_plot,
+                                              color='green', channel=1))
+        
+        hist_menu.add_command(label='B Channel Hist',
+                              command=partial(ImageHistPlotter.create_hist_plot,
+                                              color='blue', channel=2))
+        
+        hist_menu.add_command(label='Gray Hist',
+                              command=partial(ImageHistPlotter.create_hist_plot,
+                                              color='black', channel=-1))
+        
+        hist_menu.add_command(label='Apply contrast correction',
+                              command=ImageHistPlotter.apply_contrast_correction)
+
+        
+        UISingleton.main_menu.add_cascade(label='Hist menu',
+                                          menu=hist_menu)
+        
         UISingleton.main_menu.add_cascade(label='Painting',
                                           menu=paint_menu)
 

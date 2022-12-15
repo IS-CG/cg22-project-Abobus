@@ -245,4 +245,44 @@ class ImgFilterTransformer:
         final_img = binary_threshold(gray, pixel_value)
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+        
+    @classmethod
+    def do_sharpening_filtering(cls):
+        weights = ImageObjectSingleton.img_array.copy()
+        coef = int(simpledialog.askfloat(title="Type a pixel value", prompt="0-255", 
+                                                parent=UISingleton.ui_main))
+        img_array = ImageObjectSingleton.img_array
+        H, W  = weights.shape[:2]
+        for i in range(1, H - 1):
+            for j in range(1, W - 1):
+                idxes = [(i, j), (i -1, j), (i + 1, j), (i, j -1), (i, j+ 1)]
+                min_g = min([weights[i, j, 1] for i, j in idxes]) / 255
+                max_g = max([weights[i, j, 1] for i, j in idxes]) / 255
+                d_ming_g = min_g
+                d_max_g = 1 - max_g
+                if (d_max_g > d_ming_g):
+                    if (min_g == 0):
+                        a = 0
+                    else:
+                        a = d_max_g / max_g
+                else:
+                    a = d_max_g / max_g
 
+                a = np.sqrt(a)
+                dev_max = cls.lerp(-0.125, -0.2, coef)
+                w = a * dev_max
+                for k in range(3):
+                    pix = sum([w * weights[i, j, k] for i, j in idxes]) / (w * 4 + 1)
+                    if pix < 0:
+                        pix = img_array[i, j, k]
+                    if pix > 255:
+                        pix = img_array[i, j, k]
+                    img_array[i, j, k] = pix
+        
+        ImageObjectSingleton.img_array = img_array
+        ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+
+    
+    @staticmethod
+    def lerp(a, b, coef):
+        return a + coef * (b - a)

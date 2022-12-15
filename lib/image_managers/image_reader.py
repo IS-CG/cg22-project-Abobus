@@ -4,6 +4,7 @@ from array import array
 import zlib
 import struct
 
+from PIL import Image
 import cv2
 import matplotlib.pyplot as plt
 
@@ -37,6 +38,13 @@ def change_gamma_cv2(img, gamma):
 
 def default_gamma(value: float, gamma: float) -> float:
     return ((value / 255.0) ** gamma) * 255
+
+
+def help_func(filespec):
+    pixels = np.asarray(Image.open(filespec))
+    ImageObjectSingleton.img_array = pixels
+    ImageObjectSingleton.default_img = deepcopy(pixels)
+    ImageViewer.display_img_array(pixels)
 
 
 def srgb_to_linear(value: float) -> float:
@@ -221,8 +229,11 @@ class ImageReader:
                 raise Exception('invalid compression method')
             if filterm != 0:
                 raise Exception('invalid filter method')
-            if colort != 6:
-                raise Exception('we only support truecolor with alpha')
+            if colort == 6:
+                pass
+            else:
+                help_func(filespec)
+                return
             if bitd != 8:
                 raise Exception('we only support a bit depth of 8')
             if interlacem != 0:
@@ -274,7 +285,6 @@ class ImageReader:
     def save_pnm():
         img_name = filedialog.asksaveasfilename(title="save", defaultextension=".pnm")
         write_pnm(img_name=img_name)
-
 
     @staticmethod
     def save_png():

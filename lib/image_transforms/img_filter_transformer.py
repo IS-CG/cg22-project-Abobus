@@ -109,6 +109,7 @@ def binary_threshold(img, threshold):
     binary_mask = (f_img * 255) > threshold
     return np.where(binary_mask, 255, f_img).reshape((img.shape[0], img.shape[1]))
 
+
 class ImgFilterTransformer:
     @staticmethod
     def gauss_filter():
@@ -181,7 +182,7 @@ class ImgFilterTransformer:
                 final_thresh = t
                 final_value = value
         final_img = gray.copy()
-        final_img[gray > final_thresh] = 255    
+        final_img[gray > final_thresh] = 255
         final_img[gray < final_thresh] = 0
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
@@ -190,20 +191,20 @@ class ImgFilterTransformer:
     def binary_treshold():
         img = ImageObjectSingleton.img_array
         pixel_value = int(simpledialog.askfloat(title="Type a pixel value", prompt="0-255",
-                                          parent=UISingleton.ui_main))
+                                                parent=UISingleton.ui_main))
         gray = cvtColor(img, COLOR_BGR2GRAY)
         final_img = binary_threshold(gray, pixel_value)
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
-    
+
     @staticmethod
     @njit
     def sharpening_filtering(img_array: np.ndarray, coef: float) -> np.ndarray:
         weights = img_array.copy()
-        height, width  = weights.shape[:2]
+        height, width = weights.shape[:2]
         for i in range(1, height - 1):
             for j in range(1, width - 1):
-                idxes = [(i, j), (i -1, j), (i + 1, j), (i, j -1), (i, j+ 1)]
+                idxes = [(i, j), (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
                 min_g = min([weights[i, j, 1] for i, j in idxes]) / 255
                 max_g = max([weights[i, j, 1] for i, j in idxes]) / 255
                 d_max_g = 1 - max_g
@@ -211,24 +212,23 @@ class ImgFilterTransformer:
                     k_value = 0 if min_g == 0 else d_max_g / max_g
                 else:
                     k_value = d_max_g / max_g
-                
+
                 dev_max = -0.125 + coef * (-0.2 - -0.125)
                 w = np.sqrt(k_value) * dev_max
                 for k in range(3):
-                    
+
                     f_value = sum([w * weights[i, j, k] for i, j in idxes]) / (w * 4 + 1)
-                    
+
                     if f_value > 255 or f_value < 0:
                         f_value = img_array[i, j, k]
-                        
+
                     img_array[i, j, k] = f_value
         return img_array
-    
+
     @classmethod
     def do_sharpening_filtering(cls):
-        coef = int(simpledialog.askinteger(title="Type a pixel value", prompt="0-255", 
-                                           parent=UISingleton.ui_main))        
+        coef = int(simpledialog.askinteger(title="Type a pixel value", prompt="0-255",
+                                           parent=UISingleton.ui_main))
         img_array = cls.sharpening_filtering(ImageObjectSingleton.img_array, coef)
         ImageObjectSingleton.img_array = img_array
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
-

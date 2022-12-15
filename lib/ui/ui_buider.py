@@ -46,10 +46,16 @@ class UIBuilder:
     @staticmethod
     def add_file_menu():
         file_menu = Menu(UISingleton.ui_main, tearoff=0)
-        file_menu.add_command(label="Open", command=ImageReader.read_img)
-        file_menu.add_command(label="Save", command=ImageReader.save_img)
+        open_menu = Menu(UISingleton.ui_main, tearoff=0)
+        save_menu = Menu(UISingleton.ui_main, tearoff=0)
+        open_menu.add_command(label="Open .pnm", command=ImageReader.read_img_pnm)
+        open_menu.add_command(label="Open .png", command=ImageReader.read_img_png)
+        save_menu.add_command(label="Save .pnm", command=ImageReader.save_pnm)
+        save_menu.add_command(label="Save .png", command=ImageReader.save_png)
         file_menu.add_command(label='Stash Changes', command=ImageViewer.stash_changes)
         file_menu.add_command(label='Move img', command=ImageViewer.move_img_menu)
+        file_menu.add_cascade(label="Open", menu=open_menu)
+        file_menu.add_cascade(label="Save", menu=save_menu)
 
         UISingleton.main_menu.add_cascade(label="File",
                                           menu=file_menu)
@@ -59,10 +65,12 @@ class UIBuilder:
         transform_menu = Menu(UISingleton.ui_main, tearoff=0)
         transform_menu.add_command(label="Rotate", command=ImgFormatTransformer.rotate)
         transform_menu.add_command(label="Flip", command=ImgFormatTransformer.flip)
-        transform_menu.add_command(label="Resize_neighbour", command=ImgFormatTransformer.resize_neighbour)
-        transform_menu.add_command(label="Resize bilinear", command=ImgFormatTransformer.bilinear_resize)
-        transform_menu.add_command(label="Resize mitchell", command=ImgFormatTransformer.mitchell)
-        transform_menu.add_command(label="Resize lanczos", command=ImgFormatTransformer.lanczos)
+        resize_menu = Menu(UISingleton.ui_main, tearoff=0)
+        resize_menu.add_command(label="Resize_neighbour", command=ImgFormatTransformer.resize_neighbour)
+        resize_menu.add_command(label="Resize bilinear", command=ImgFormatTransformer.bilinear_resize)
+        resize_menu.add_command(label="Resize mitchell", command=ImgFormatTransformer.mitchell)
+        resize_menu.add_command(label="Resize lanczos", command=ImgFormatTransformer.lanczos)
+        transform_menu.add_cascade(label="Resize image", menu=resize_menu)
 
         gamma_menu = Menu(UISingleton.ui_main, tearoff=0)
         gamma_menu.add_command(label='view_new_gamma', command=GammaTransformer.view_new_gamma)

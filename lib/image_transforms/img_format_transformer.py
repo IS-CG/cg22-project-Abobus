@@ -140,10 +140,10 @@ class ImgFormatTransformer:
                     y4 = math.floor(y) + 2 - y
 
                     # Considering all nearby 16 values
-                    mat_l = np.matrix(
+                    mat_l = np.array(
                         [[bicubic_kernel(x1, B_m, C_m), bicubic_kernel(x2, B_m, C_m), bicubic_kernel(x3, B_m, C_m),
                           bicubic_kernel(x4, B_m, C_m)]])
-                    mat_m = np.matrix([[img[int(y - y1), int(x - x1), c],
+                    mat_m = np.array([[img[int(y - y1), int(x - x1), c],
                                         img[int(y - y2), int(x - x1), c],
                                         img[int(y + y3), int(x - x1), c],
                                         img[int(y + y4), int(x - x1), c]],
@@ -159,7 +159,7 @@ class ImgFormatTransformer:
                                         img[int(y - y2), int(x + x4), c],
                                         img[int(y + y3), int(x + x4), c],
                                         img[int(y + y4), int(x + x4), c]]])
-                    mat_r = np.matrix(
+                    mat_r = np.array(
                         [[bicubic_kernel(y1, B_m, C_m)], [bicubic_kernel(y2, B_m, C_m)], [bicubic_kernel(y3, B_m, C_m)],
                          [bicubic_kernel(y4, B_m, C_m)]])
 
@@ -204,9 +204,9 @@ class ImgFormatTransformer:
                     y4 = math.floor(y) + 2 - y
 
                     # Considering all nearby 16 values
-                    mat_l = np.matrix(
+                    mat_l = np.array(
                         [[lanczos_filter(x1), lanczos_filter(x2), lanczos_filter(x3), lanczos_filter(x4)]])
-                    mat_m = np.matrix([[img[int(y - y1), int(x - x1), c],
+                    mat_m = np.array([[img[int(y - y1), int(x - x1), c],
                                         img[int(y - y2), int(x - x1), c],
                                         img[int(y + y3), int(x - x1), c],
                                         img[int(y + y4), int(x - x1), c]],
@@ -222,7 +222,7 @@ class ImgFormatTransformer:
                                         img[int(y - y2), int(x + x4), c],
                                         img[int(y + y3), int(x + x4), c],
                                         img[int(y + y4), int(x + x4), c]]])
-                    mat_r = np.matrix(
+                    mat_r = np.array(
                         [[lanczos_filter(y1)], [lanczos_filter(y2)], [lanczos_filter(y3)], [lanczos_filter(y4)]])
 
                     resized_img[j, i, c] = np.dot(np.dot(mat_l, mat_m), mat_r)

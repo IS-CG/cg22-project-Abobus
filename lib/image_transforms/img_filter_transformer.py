@@ -2,8 +2,8 @@ from itertools import product
 from tkinter import simpledialog
 
 import numpy as np
-from cv2 import COLOR_BGR2GRAY, cvtColor, imread, imshow, waitKey
-from numpy import dot, exp, mgrid, pi, ravel, square, uint8, zeros, zeros_like, sort, int8, divide, multiply, pad
+from cv2 import COLOR_RGB2GRAY, cvtColor
+from numpy import dot, exp, mgrid, pi, ravel, square, uint8, zeros, zeros_like, sort, int8, divide, multiply
 from numba import njit
 from lib.image_managers import ImageViewer
 from lib.singleton_objects import ImageObjectSingleton, UISingleton
@@ -114,7 +114,7 @@ class ImgFilterTransformer:
     @staticmethod
     def gauss_filter():
         img = ImageObjectSingleton.img_array
-        gray = cvtColor(img, COLOR_BGR2GRAY)
+        gray = cvtColor(img, COLOR_RGB2GRAY) if len(img.shape) == 3 else img
         sigma = int(simpledialog.askfloat(title="Type a sigma value", prompt="Sigma",
                                           parent=UISingleton.ui_main))
         gaussian3x3 = gaussian_filter(gray, 3, sigma=sigma)
@@ -124,7 +124,7 @@ class ImgFilterTransformer:
     @staticmethod
     def median_filter():
         img = ImageObjectSingleton.img_array
-        gray = cvtColor(img, COLOR_BGR2GRAY)
+        gray = cvtColor(img, COLOR_RGB2GRAY) if len(img.shape) == 3 else img
         kernel_radius = int(simpledialog.askfloat(title="Type a kernel_radius value", prompt="Kernel radius",
                                                   parent=UISingleton.ui_main))
         median3x3 = median_filter(gray, kernel_radius)
@@ -160,39 +160,53 @@ class ImgFilterTransformer:
         ImageObjectSingleton.img_array = np.array(blurred).astype(uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
-    @staticmethod
-    def otsu_filter():
+    @classmethod
+    def otsu_filter(cls):
         img = ImageObjectSingleton.img_array
-        gray = cvtColor(img, COLOR_BGR2GRAY)
-        pixel_number = gray.shape[0] * gray.shape[1]
-        mean_weigth = 1.0 / pixel_number
-        his, bins = np.histogram(gray, np.array(range(0, 256)))
-        final_thresh = -1
-        final_value = -1
-        for t in bins[1:-1]:
-            Wb = np.sum(his[:t]) * mean_weigth
-            Wf = np.sum(his[t:]) * mean_weigth
-
-            mub = np.mean(his[:t])
-            muf = np.mean(his[t:])
-
-            value = Wb * Wf * (mub - muf) ** 2
-
-            if value > final_value:
-                final_thresh = t
-                final_value = value
-        final_img = gray.copy()
-        final_img[gray > final_thresh] = 255
-        final_img[gray < final_thresh] = 0
-        ImageObjectSingleton.img_array = final_img
+        gray = cvtColor(img, COLOR_RGB2GRAY) if len(img.shape) == 3 else img
+        otsu = cls.otsu_threshold(gray)
+        ImageObjectSingleton.img_array = otsu
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+    
+    @staticmethod
+    def otsu_threshold(img):
+        """
+        Perform otsu thresholding.
+        :img: the original grayscale image.
+        """
+        f_img = img.flatten()
+        hist, _ = np.histogram(f_img, bins=range(257))
+        total = f_img.shape[0]
+        sum_bin, w_bin, maxi, level = 0, 0, 0, 0
+        sum1 = np.dot(np.arange(0, 256), hist)
+        for i in range(0, 256):
+            w_bin += hist[i]
+
+            if w_bin == 0:
+                continue
+
+            w_f = total - w_bin
+            if w_f == 0:
+                break
+
+            sum_bin += i * hist[i]
+            m_b = sum_bin / w_bin
+            m_f = (sum1 - sum_bin) / w_f
+            between = w_bin * w_f * (m_b - m_f) ** 2
+
+            if between >= maxi:
+                level = i
+                maxi = between
+
+        binary_mask = (f_img * 255) > level
+        return np.where(binary_mask, 0, f_img).reshape((img.shape[0], img.shape[1]))
 
     @staticmethod
     def binary_treshold():
         img = ImageObjectSingleton.img_array
         pixel_value = int(simpledialog.askfloat(title="Type a pixel value", prompt="0-255",
                                                 parent=UISingleton.ui_main))
-        gray = cvtColor(img, COLOR_BGR2GRAY)
+        gray = cvtColor(img, COLOR_RGB2GRAY) if len(img.shape) == 3 else img
         final_img = binary_threshold(gray, pixel_value)
         ImageObjectSingleton.img_array = final_img
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)

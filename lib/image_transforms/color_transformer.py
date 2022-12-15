@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit
 
 from lib.image_managers import ImageViewer
 from lib.singleton_objects import ImageObjectSingleton
@@ -15,6 +16,38 @@ class ColorTransformer:
 
     Args: None
     """
+    
+    @staticmethod
+    # @njit
+    def YCrCb_601_to_rgb(img_array):
+        y, cb, cr = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
+                                                                                        2].astype(float)
+        r, g, b = np.zeros_like(y), np.zeros_like(cb), np.zeros_like(cr)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                r[i][j] = y[i][j] + 1.403 * (cr[i][j] - 128)
+                g[i][j] = y[i][j] - 0.714 * (cr[i][j] - 128) - 0.344 * (cb[i][j] - 128)
+                b[i][j] = y[i][j] + 1.773 * (cb[i][j] - 128)
+        img_array = (np.dstack((r, g, b))).astype(np.uint8)
+        return img_array
+    
+    @staticmethod
+    # @njit
+    def YCrCb_709_to_rgb(img_array):
+        y, cb, cr = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
+                                                                                        2].astype(float)
+        r, g, b = np.zeros_like(y), np.zeros_like(cb), np.zeros_like(cr)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                r[i][j] = y[i][j] + 1.5748 * (cr[i][j] - 128)
+                g[i][j] = y[i][j] - 0.635 * (cr[i][j] - 128) - 0.1873 * (cb[i][j] - 128)
+                b[i][j] = y[i][j] + 1.8556 * (cb[i][j] - 128)
+        img_array = (np.dstack((r, g, b))).astype(np.uint8)
+        return img_array
+        
+
     @classmethod
     def change_to_rgb(cls,
                       display=True):
@@ -54,7 +87,6 @@ class ColorTransformer:
                     if tmp == 5:
                         r[i][j], g[i][j], b[i][j] = v[i][j], p, q
             img_array = (np.dstack((r, g, b)) * 255).astype(np.uint8)
-            color = "RGB"
         if color == "HLS":
             h = img_array[..., 0].astype(float) / 255
             l = img_array[..., 1].astype(float) / 255
@@ -67,34 +99,11 @@ class ColorTransformer:
             h, l, s = h, l, s
             img_array = (np.dstack((h, l, s)) * 255).astype(np.uint8)
 
-            color = "RGB"
         if color == "YCrCb_601":
-            y, cb, cr = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
-                                                                                            2].astype(float)
-            r, g, b = np.zeros_like(y), np.zeros_like(cb), np.zeros_like(cr)
-            n, m = y.shape
-            for i in range(n):
-                for j in range(m):
-                    r[i][j] = y[i][j] + 1.403 * (cr[i][j] - 128)
-                    g[i][j] = y[i][j] - 0.714 * (cr[i][j] - 128) - 0.344 * (cb[i][j] - 128)
-                    b[i][j] = y[i][j] + 1.773 * (cb[i][j] - 128)
-            img_array = (np.dstack((r, g, b))).astype(np.uint8)
-
-            color = "RGB"
+            img_array = cls.YCrCb_601_to_rgb(img_array)
 
         if color == "YCrCb_709":
-            y, cb, cr = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :,
-                                                                                            2].astype(float)
-            r, g, b = np.zeros_like(y), np.zeros_like(cb), np.zeros_like(cr)
-            n, m = y.shape
-            for i in range(n):
-                for j in range(m):
-                    r[i][j] = y[i][j] + 1.5748 * (cr[i][j] - 128)
-                    g[i][j] = y[i][j] - 0.635 * (cr[i][j] - 128) - 0.1873 * (cb[i][j] - 128)
-                    b[i][j] = y[i][j] + 1.8556 * (cb[i][j] - 128)
-            img_array = (np.dstack((r, g, b))).astype(np.uint8)
-
-            color = "RGB"
+            img_array = cls.YCrCb_709_to_rgb(img_array)
 
         if color == "YCoCg":
             y, co, cg = img_array[:, :, 0].astype(float) / 255, img_array[:, :, 1].astype(float) / 255, img_array[:, :,
@@ -109,14 +118,14 @@ class ColorTransformer:
                     b[i][j] = y[i][j] - co[i][j] - cg[i][j]
             img_array = (np.dstack((r, g, b)) * 255).astype(np.uint8)
 
-            color = "RGB"
 
         if color == "CMY":
             c = 255 - img_array[..., 0].astype(float)
             m = 255 - img_array[..., 1].astype(float)
             y = 255 - img_array[..., 2].astype(float)
             img_array = (np.dstack((c, m, y))).astype(np.uint8)
-            color = "RGB"
+            
+        color = "RGB"
 
         ImageObjectSingleton.img_array = img_array
         ImageObjectSingleton.color = color
@@ -238,6 +247,20 @@ class ColorTransformer:
             cls.change_to_rgb(display=False)
             cls.change_to_ycrcb_601()
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
+    
+    @staticmethod
+    # @njit
+    def change_to_ycrcb_709_mat(img_array):
+        r, g, b = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :, 2].astype(float)
+        y, cb, cr = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
+        n, m = y.shape
+        for i in range(n):
+            for j in range(m):
+                y[i][j] = 0.2126 * r[i][j] + 0.7152 * g[i][j] + 0.0722 * b[i][j]
+                cr[i][j] = (r[i][j] - y[i][j]) * 0.635 + 128
+                cb[i][j] = (b[i][j] - y[i][j]) * 0.5389 + 128
+        img_array = (np.dstack((y, cb, cr))).astype(np.uint8)
+        return img_array
 
     @classmethod
     def change_to_ycrcb_709(cls):
@@ -251,16 +274,7 @@ class ColorTransformer:
         color = ImageObjectSingleton.color
 
         if color == "RGB":
-            r, g, b = img_array[:, :, 0].astype(float), img_array[:, :, 1].astype(float), img_array[:, :, 2].astype(float)
-            y, cb, cr = np.zeros_like(r), np.zeros_like(g), np.zeros_like(b)
-            n, m = y.shape
-            for i in range(n):
-                for j in range(m):
-                    y[i][j] = 0.2126 * r[i][j] + 0.7152 * g[i][j] + 0.0722 * b[i][j]
-                    cr[i][j] = (r[i][j] - y[i][j]) * 0.635 + 128
-                    cb[i][j] = (b[i][j] - y[i][j]) * 0.5389 + 128
-
-            img_array = (np.dstack((y, cb, cr))).astype(np.uint8)
+            img_array = cls.change_to_ycrcb_709_mat(img_array)
             ImageObjectSingleton.color = "YCrCb_709"
             ImageObjectSingleton.img_array = img_array
         else:
@@ -323,11 +337,17 @@ class ColorTransformer:
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @staticmethod
+    @njit
     def hls_to_rgb(h, l, s):
         """
         Args: h -  hue, s - saturation, s - lightness
         : return: None
         """
+        
+        ONE_THIRD = 1.0 / 3.0
+        ONE_SIXTH = 1.0 / 6.0
+        TWO_THIRD = 2.0 / 3.0
+        
         def _v(m1, m2, hue):
             hue = hue % 1.0
             if hue < ONE_SIXTH:

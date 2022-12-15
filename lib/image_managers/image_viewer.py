@@ -59,11 +59,11 @@ class ImageViewer:
         """
         moves image to new center by user input
         """
-        new_center_x = int(simpledialog.askstring("Input", "Enter center X coordinate:"))
-        new_center_y = int(simpledialog.askstring("Input", "Enter center Y coordinate:"))
+        new_center_x = float(simpledialog.askstring("Input", "Enter center X coordinate:"))
+        new_center_y = float(simpledialog.askstring("Input", "Enter center Y coordinate:"))
 
-        x = int(new_center_x - ImageObjectSingleton.img.width // 2)
-        y = int(new_center_y - ImageObjectSingleton.img.height // 2)
+        x = float(new_center_x - ImageObjectSingleton.img.width // 2)
+        y = float(new_center_y - ImageObjectSingleton.img.height // 2)
         UISingleton.canvas.move(UISingleton.img_box, x, y)
 
     @classmethod

@@ -40,14 +40,13 @@ class ImgFormatTransformer:
         ImageObjectSingleton.img = ImageObjectSingleton.img.transpose(Image.FLIP_LEFT_RIGHT)
         ImageViewer.display_img()
 
-
     @staticmethod
     def resize_neighbour():
         img_array = ImageObjectSingleton.img_array
         height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
-                                       parent=UISingleton.ui_main))
+                                           parent=UISingleton.ui_main))
         width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
-                                       parent=UISingleton.ui_main))
+                                          parent=UISingleton.ui_main))
         img_width, img_height, channel = img_array.shape
 
         r, g, b = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
@@ -72,32 +71,29 @@ class ImgFormatTransformer:
     def bilinear_resize():
         image = ImageObjectSingleton.img_array
         img_height, img_width = image.shape[:2]
-        height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
-                                       parent=UISingleton.ui_main))
-        width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
-                                       parent=UISingleton.ui_main))
-        resized = np.array(Image.new('RGB', (width, height)))
+        new_height = int(simpledialog.askfloat(title="Type a height value", prompt="Try not to use big values",
+                                               parent=UISingleton.ui_main))
+        new_width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
+                                              parent=UISingleton.ui_main))
+        resized = np.array(Image.new('RGB', (new_width, new_height)))
 
-        x_ratio = float(img_width - 1) / (width - 1) if width > 1 else 0
-        y_ratio = float(img_height - 1) / (height - 1) if height > 1 else 0
+        x_ratio = float(img_width - 1) / (new_width - 1) if new_width > 1 else 0
+        y_ratio = float(img_height - 1) / (new_height - 1) if new_height > 1 else 0
 
-        for i in range(height):
-            for j in range(width):
+        for i in range(new_height):
+            for j in range(new_width):
                 x_l, y_l = math.floor(x_ratio * j), math.floor(y_ratio * i)
                 x_h, y_h = math.ceil(x_ratio * j), math.ceil(y_ratio * i)
 
-                x_weight = (x_ratio * j) - x_l
-                y_weight = (y_ratio * i) - y_l
+                x_weight, y_weight = (x_ratio * j) - x_l, (y_ratio * i) - y_l
 
                 a = image[y_l, x_l]
                 b = image[y_l, x_h]
                 c = image[y_h, x_l]
                 d = image[y_h, x_h]
 
-                pixel = a * (1 - x_weight) * (1 - y_weight) \
-                        + b * x_weight * (1 - y_weight) + \
-                        c * (1 - x_weight) * y_weight + \
-                        d * x_weight * y_weight
+                pixel = a * (1 - x_weight) * (1 - y_weight) + b * x_weight * (1 - y_weight) + \
+                        c * (1 - x_weight) * y_weight + d * x_weight * y_weight
 
                 resized[i][j] = pixel
 
@@ -110,8 +106,10 @@ class ImgFormatTransformer:
                                            parent=UISingleton.ui_main))
         width = int(simpledialog.askfloat(title="Type a width value", prompt="Try not to use big values",
                                           parent=UISingleton.ui_main))
-        B_m = simpledialog.askfloat(title="Type a B_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
-        C_m = simpledialog.askfloat(title="Type a C_m value", prompt="Try not to use big values", parent=UISingleton.ui_main)
+        B_m = simpledialog.askfloat(title="Type a B_m value", prompt="Try not to use big values",
+                                    parent=UISingleton.ui_main)
+        C_m = simpledialog.askfloat(title="Type a C_m value", prompt="Try not to use big values",
+                                    parent=UISingleton.ui_main)
         img = ImageObjectSingleton.img_array
         height_image, width_image, channels = img.shape
 

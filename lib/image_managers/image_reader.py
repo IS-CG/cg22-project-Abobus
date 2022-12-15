@@ -159,15 +159,15 @@ def PaethPredictor(a, b, c):
     return Pr
 
 
-def Recon_a(r, c, Recon, stride, bytesPerPixel):
+def reconstruction_a(r, c, Recon, stride, bytesPerPixel):
     return Recon[r * stride + c - bytesPerPixel] if c >= bytesPerPixel else 0
 
 
-def Recon_b(r, c, Recon, stride):
+def reconstruction_b(r, c, Recon, stride):
     return Recon[(r - 1) * stride + c] if r > 0 else 0
 
 
-def Recon_c(r, c, Recon, stride, bytesPerPixel):
+def reconstruction_c(r, c, Recon, stride, bytesPerPixel):
     return Recon[(r - 1) * stride + c - bytesPerPixel] if r > 0 and c >= bytesPerPixel else 0
 
 
@@ -247,28 +247,28 @@ class ImageReader:
             stride = width * bytesPerPixel
 
             i = 0
-            for r in range(height):  # for each scanline
-                filter_type = IDAT_data[i]  # first byte of scanline is filter type
+            for row in range(height):
+                filter_type = IDAT_data[i]
                 i += 1
-                for c in range(stride):  # for each byte in scanline
+                for byte_i in range(stride):
                     Filt_x = IDAT_data[i]
                     i += 1
                     if filter_type == 0:  # None
                         Recon_x = Filt_x
                     elif filter_type == 1:  # Sub
-                        Recon_x = Filt_x + Recon_a(r, c, Recon, stride, bytesPerPixel)
+                        Recon_x = Filt_x + reconstruction_a(row, byte_i, Recon, stride, bytesPerPixel)
                     elif filter_type == 2:  # Up
-                        Recon_x = Filt_x + Recon_b(r, c, Recon, stride)
+                        Recon_x = Filt_x + reconstruction_b(row, byte_i, Recon, stride)
                     elif filter_type == 3:  # Average
                         Recon_x = Filt_x + (
-                                Recon_a(r, c, Recon, stride, bytesPerPixel) + Recon_b(r, c, Recon, stride)) // 2
+                                reconstruction_a(row, byte_i, Recon, stride, bytesPerPixel) + reconstruction_b(row, byte_i, Recon, stride)) // 2
                     elif filter_type == 4:  # Paeth
-                        Recon_x = Filt_x + PaethPredictor(Recon_a(r, c, Recon, stride, bytesPerPixel),
-                                                          Recon_b(r, c, Recon, stride),
-                                                          Recon_c(r, c, Recon, stride, bytesPerPixel))
+                        Recon_x = Filt_x + PaethPredictor(reconstruction_a(row, byte_i, Recon, stride, bytesPerPixel),
+                                                          reconstruction_b(row, byte_i, Recon, stride),
+                                                          reconstruction_c(row, byte_i, Recon, stride, bytesPerPixel))
                     else:
                         raise Exception('unknown filter type: ' + str(filter_type))
-                    Recon.append(Recon_x & 0xff)  # truncation to byte
+                    Recon.append(Recon_x & 0xff)
         pixels = np.array(Recon)
         shape = (height, width, 4)
         pixels = pixels.reshape(shape).astype(np.uint8)

@@ -133,7 +133,6 @@ class ImgFilterTransformer:
     @staticmethod
     def sobel_filter():
         img = ImageObjectSingleton.img_array
-        [nx, ny, nz] = np.shape(img)
         r_img, g_img, b_img = img[:, :, 0], img[:, :, 1], img[:, :, 2]
 
         gamma = 1.400
@@ -169,7 +168,7 @@ class ImgFilterTransformer:
         his, bins = np.histogram(gray, np.array(range(0, 256)))
         final_thresh = -1
         final_value = -1
-        for t in bins[1:-1]:  # This goes from 1 to 254 uint8 range (Pretty sure wont be those values)
+        for t in bins[1:-1]:
             Wb = np.sum(his[:t]) * mean_weigth
             Wf = np.sum(his[t:]) * mean_weigth
 
@@ -177,7 +176,6 @@ class ImgFilterTransformer:
             muf = np.mean(his[t:])
 
             value = Wb * Wf * (mub - muf) ** 2
-
 
             if value > final_value:
                 final_thresh = t

@@ -215,6 +215,8 @@ class ImgFilterTransformer:
         img = ImageObjectSingleton.img_array
         filterSize = int(simpledialog.askfloat(title="Type a filter size", prompt="aboba",
                                                parent=UISingleton.ui_main))
+        if filterSize % 2 == 0:
+            filterSize -= 1
         img = cvtColor(img, COLOR_RGB2GRAY) if len(img.shape) == 3 else img
         height = img.shape[0]
         width = img.shape[1]

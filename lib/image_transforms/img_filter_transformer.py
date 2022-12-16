@@ -1,6 +1,6 @@
 from itertools import product
 from tkinter import simpledialog
-
+from PIL import ImageFilter
 import numpy as np
 import cv2
 from cv2 import COLOR_RGB2GRAY, cvtColor
@@ -16,16 +16,18 @@ def gaussian_kernel(mask_size, sigma, twoDimensional=True):
     Creates a gaussian kernel with given sigma and size, 3rd argument is for choose the kernel as 1d or 2d
     """
     if twoDimensional:
-        kernel = np.fromfunction(lambda x, y: (1/(2*math.pi*sigma**2)) * math.e ** ((-1*((x-(mask_size-1)/2)**2+(y-(mask_size-1)/2)**2))/(2*sigma**2)),
+        kernel = np.fromfunction(lambda x, y: (1 / (2 * math.pi * sigma ** 2)) * math.e ** (
+                (-1 * ((x - (mask_size - 1) / 2) ** 2 + (y - (mask_size - 1) / 2) ** 2)) / (2 * sigma ** 2)),
                                  (mask_size, mask_size))
     else:
-        kernel = np.fromfunction(lambda x: math.e ** ((-1*(x-(mask_size-1)/2)**2) / (2*sigma**2)), (mask_size,))
+        kernel = np.fromfunction(lambda x: math.e ** ((-1 * (x - (mask_size - 1) / 2) ** 2) / (2 * sigma ** 2)),
+                                 (mask_size,))
     return kernel / np.sum(kernel)
 
 
 def gaussian_filter(gray_img, mask=3, sigma=1):
-    g_kernel_x = gaussian_kernel(mask,sigma, False)
-    g_kernel_y = g_kernel_x.reshape(-1,1)
+    g_kernel_x = gaussian_kernel(mask, sigma, False)
+    g_kernel_y = g_kernel_x.reshape(-1, 1)
     dst = convolve(gray_img, g_kernel_x)
     dst = convolve(dst, g_kernel_y)
     return dst
@@ -33,6 +35,7 @@ def gaussian_filter(gray_img, mask=3, sigma=1):
 
 def convolve(img: np.array, kernel: np.array) -> np.array:
     """ Applies a 2d convolution """
+
     def add_padding_to_image(img: np.array, kernel_size: int) -> np.array:
         def get_padding_width_per_side(kernel_size: int) -> int:
             return kernel_size // 2
@@ -66,13 +69,11 @@ def convolve(img: np.array, kernel: np.array) -> np.array:
 
     for i in range(tgt_size):
         for j in range(tgt_size):
-            mat = pad_img[i:i+k, j:j+k]
+            mat = pad_img[i:i + k, j:j + k]
             convolved_img[i, j] = np.sum(np.multiply(mat, kernel))
 
     return convolved_img
 
-    
-    
 
 def median_filter(gray_img, mask=3):
     """
@@ -90,53 +91,6 @@ def median_filter(gray_img, mask=3):
     return median_img
 
 
-def boxBlur_kernel(square):
-    tot_sum = 0
-    for i in range(3):
-        for j in range(3):
-            tot_sum += square[i][j]
-
-    return tot_sum // 9
-
-
-def boxBlur(image):
-    """
-    This function will calculate the blurred
-    image for given n * n image.
-    """
-    square = []
-    square_row = []
-    blur_row = []
-    blur_img = []
-    n_rows = len(image)
-    n_col = len(image[0])
-
-    rp, cp = 0, 0
-
-    while rp <= n_rows - 3:
-        while cp <= n_col - 3:
-
-            for i in range(rp, rp + 3):
-
-                for j in range(cp, cp + 3):
-                    square_row.append(image[i][j])
-
-                square.append(square_row)
-                square_row = []
-
-            blur_row.append(boxBlur_kernel(square))
-            square = []
-
-            cp = cp + 1
-
-        blur_img.append(blur_row)
-        blur_row = []
-        rp = rp + 1
-        cp = 0
-
-    return blur_img
-
-
 def binary_threshold(img, threshold):
     """
     Perform binary thresholding.
@@ -147,6 +101,66 @@ def binary_threshold(img, threshold):
     f_img = img.flatten()
     binary_mask = (f_img * 255) > threshold
     return np.where(binary_mask, 255, f_img).reshape((img.shape[0], img.shape[1]))
+
+
+def integral_image(img):
+    """
+    Returns the integral image/summed area table. See here: https://en.wikipedia.org/wiki/Summed_area_table
+    :param img:
+    :return:
+    """
+    height = img.shape[0]
+    width = img.shape[1]
+    int_image = np.zeros((height, width), np.uint64)
+    for y in range(height):
+        for x in range(width):
+            up = 0 if (y - 1 < 0) else int_image.item((y - 1, x))
+            left = 0 if (x - 1 < 0) else int_image.item((y, x - 1))
+            diagonal = 0 if (x - 1 < 0 or y - 1 < 0) else int_image.item((y - 1, x - 1))
+            val = img.item((y, x)) + int(up) + int(left) - int(diagonal)
+            int_image.itemset((y, x), val)
+    return int_image
+
+
+def adjust_edges(height, width, point):
+    """
+    This handles the edge cases if the box's bounds are outside the image range based on current pixel.
+    :param height: Height of the image.
+    :param width: Width of the image.
+    :param point: The current point.
+    :return:
+    """
+    newPoint = [point[0], point[1]]
+    if point[0] >= height:
+        newPoint[0] = height - 1
+
+    if point[1] >= width:
+        newPoint[1] = width - 1
+    return tuple(newPoint)
+
+
+def find_area(int_img, a, b, c, d):
+    """
+    :param int_img: our img.
+    :param a: Top left corner.
+    :param b: Top right corner.
+    :param c: Bottom left corner.
+    :param d: Bottom right corner.
+    :return: The integral image.
+    """
+    height = int_img.shape[0]
+    width = int_img.shape[1]
+    a = adjust_edges(height, width, a)
+    b = adjust_edges(height, width, b)
+    c = adjust_edges(height, width, c)
+    d = adjust_edges(height, width, d)
+
+    a = 0 if (a[0] < 0 or a[0] >= height) or (a[1] < 0 or a[1] >= width) else int_img.item(a[0], a[1])
+    b = 0 if (b[0] < 0 or b[0] >= height) or (b[1] < 0 or b[1] >= width) else int_img.item(b[0], b[1])
+    c = 0 if (c[0] < 0 or c[0] >= height) or (c[1] < 0 or c[1] >= width) else int_img.item(c[0], c[1])
+    d = 0 if (d[0] < 0 or d[0] >= height) or (d[1] < 0 or d[1] >= width) else int_img.item(d[0], d[1])
+
+    return a + d - b - c
 
 
 class ImgFilterTransformer:
@@ -199,8 +213,20 @@ class ImgFilterTransformer:
     @staticmethod
     def box_blur():
         img = ImageObjectSingleton.img_array
-        blurred = boxBlur(img)
-        ImageObjectSingleton.img_array = np.array(blurred).astype(uint8)
+        filterSize = int(simpledialog.askfloat(title="Type a filter size", prompt="aboba",
+                                               parent=UISingleton.ui_main))
+        img = cvtColor(img, COLOR_RGB2GRAY) if len(img.shape) == 3 else img
+        height = img.shape[0]
+        width = img.shape[1]
+        intImg = integral_image(img)
+        finalImg = np.ones((height, width), np.uint64)
+        loc = filterSize // 2
+        for y in range(height):
+            for x in range(width):
+                finalImg.itemset((y, x), find_area(intImg, (y - loc - 1, x - loc - 1), (y - loc - 1, x + loc),
+                                                   (y + loc, x - loc - 1), (y + loc, x + loc)) / (filterSize ** 2))
+
+        ImageObjectSingleton.img_array = finalImg.astype(uint8)
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 
     @classmethod
@@ -210,7 +236,7 @@ class ImgFilterTransformer:
         otsu = cls.otsu_threshold(gray)
         ImageObjectSingleton.img_array = otsu
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
-    
+
     @staticmethod
     def otsu_threshold(img):
         """

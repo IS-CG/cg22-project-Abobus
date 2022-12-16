@@ -2,38 +2,77 @@ from itertools import product
 from tkinter import simpledialog
 
 import numpy as np
+import cv2
 from cv2 import COLOR_RGB2GRAY, cvtColor
 from numpy import dot, exp, mgrid, pi, ravel, square, uint8, zeros, zeros_like, sort, int8, divide, multiply
 from numba import njit
 from lib.image_managers import ImageViewer
 from lib.singleton_objects import ImageObjectSingleton, UISingleton
+import math
 
 
-def gen_gaussian_kernel(k_size, sigma):
-    center = k_size // 2
-    x, y = mgrid[0 - center: k_size - center, 0 - center: k_size - center]
-    g = 1 / (2 * pi * sigma) * exp(-(square(x) + square(y)) / (2 * square(sigma)))
-    return g
+def gaussian_kernel(mask_size, sigma, twoDimensional=True):
+    """
+    Creates a gaussian kernel with given sigma and size, 3rd argument is for choose the kernel as 1d or 2d
+    """
+    if twoDimensional:
+        kernel = np.fromfunction(lambda x, y: (1/(2*math.pi*sigma**2)) * math.e ** ((-1*((x-(mask_size-1)/2)**2+(y-(mask_size-1)/2)**2))/(2*sigma**2)),
+                                 (mask_size, mask_size))
+    else:
+        kernel = np.fromfunction(lambda x: math.e ** ((-1*(x-(mask_size-1)/2)**2) / (2*sigma**2)), (mask_size,))
+    return kernel / np.sum(kernel)
 
 
-def gaussian_filter(image, k_size, sigma):
-    height, width = image.shape[0], image.shape[1]
-    dst_height = height - k_size + 1
-    dst_width = width - k_size + 1
-    image_array = zeros((dst_height * dst_width, k_size * k_size))
-    row = 0
-    for i, j in product(range(dst_height), range(dst_width)):
-        window = ravel(image[i: i + k_size, j: j + k_size])
-        image_array[row, :] = window
-        row += 1
-
-    gaussian_kernel = gen_gaussian_kernel(k_size, sigma)
-    filter_array = ravel(gaussian_kernel)
-
-    dst = dot(image_array, filter_array).reshape(dst_height, dst_width).astype(uint8)
-
+def gaussian_filter(gray_img, mask=3, sigma=1):
+    g_kernel_x = gaussian_kernel(mask,sigma, False)
+    g_kernel_y = g_kernel_x.reshape(-1,1)
+    dst = convolve(gray_img, g_kernel_x)
+    dst = convolve(dst, g_kernel_y)
     return dst
 
+
+def convolve(img: np.array, kernel: np.array) -> np.array:
+    """ Applies a 2d convolution """
+    def add_padding_to_image(img: np.array, kernel_size: int) -> np.array:
+        def get_padding_width_per_side(kernel_size: int) -> int:
+            return kernel_size // 2
+
+        padding_width = get_padding_width_per_side(kernel_size)
+        img_with_padding = np.zeros(shape=(
+            img.shape[0] + padding_width * 2,
+            img.shape[1] + padding_width * 2
+        ))
+        img_with_padding[padding_width:-padding_width, padding_width:-padding_width] = img
+
+        return img_with_padding
+
+    return cv2.filter2D(img, -1, kernel)
+
+    def calculate_target_size(img_size: int, kernel_size: int) -> int:
+        num_pixels = 0
+        for i in range(img_size):
+            added = i + kernel_size
+            if added <= img_size:
+                num_pixels += 1
+        return num_pixels
+
+    pad_img = add_padding_to_image(img, kernel_size=kernel.shape[0])
+    tgt_size = calculate_target_size(
+        img_size=max(pad_img.shape[0], pad_img.shape[1]),
+        kernel_size=kernel.shape[0]
+    )
+    k = kernel.shape[0]
+    convolved_img = np.zeros(shape=(tgt_size, tgt_size))
+
+    for i in range(tgt_size):
+        for j in range(tgt_size):
+            mat = pad_img[i:i+k, j:j+k]
+            convolved_img[i, j] = np.sum(np.multiply(mat, kernel))
+
+    return convolved_img
+
+    
+    
 
 def median_filter(gray_img, mask=3):
     """
@@ -117,7 +156,8 @@ class ImgFilterTransformer:
         gray = cvtColor(img, COLOR_RGB2GRAY) if len(img.shape) == 3 else img
         sigma = int(simpledialog.askfloat(title="Type a sigma value", prompt="Sigma",
                                           parent=UISingleton.ui_main))
-        gaussian3x3 = gaussian_filter(gray, 3, sigma=sigma)
+        mask_size = 3 * sigma
+        gaussian3x3 = gaussian_filter(gray, mask=mask_size, sigma=sigma)
         ImageObjectSingleton.img_array = gaussian3x3
         ImageViewer.display_img_array(ImageObjectSingleton.img_array)
 

@@ -222,7 +222,7 @@ class ImageReader:
             gama_data = b''.join(chunk_data for chunk_type, chunk_data in chunks if chunk_type == b'gAMA')
             gama_value = None
             if gama_data:
-                gama_value = struct.unpack("!L", gama_data)[0] / 80
+                gama_value = struct.unpack("!L", gama_data)[0] / 10000
             _, IHDR_data = chunks[0]  # IHDR is always first chunk
             width, height, bitd, colort, compm, filterm, interlacem = struct.unpack('>IIBBBBB', IHDR_data)
             if compm != 0:
